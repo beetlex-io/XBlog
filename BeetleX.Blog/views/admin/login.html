@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminSetting.js"></script>
+    <script src="/js/md5.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>登陆</h3>
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+
+
+            <div style="margin:auto;width:400px;">
+
+                <form>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">用户名</label>
+                        <input type="email" class="form-control" id="name" placeholder="admin">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">密码</label>
+                        <input type="password" class="form-control" id="pwd" placeholder="123456">
+                    </div>
+                    <button type="button" onclick="login()" class="btn btn-default">登陆</button>
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+    <script>
+        async function login() {
+            var name = $('#name').val();
+            var pwd = md5($('#pwd').val());
+            var result = await AdminSettingLogin(name, pwd, true);
+            if (result.Data == true) {
+                window.location.href = '/admin/';
+            }
+            else {
+                alert('用户名密码不正确！');
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminComment.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>评论</h3>
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+            <div class="col-md-8" role="main">
+
+                <div style="padding:5px;">
+                    <form class="navbar-form navbar-left btn-group-sm" style="display:contents;margin-bottom:4px;" role="search">
+                        <a href="javascript:void(0)" onclick="delComment()" class="btn btn-default">删除</a>
+                    </form>
+                </div>
+                <table class="table table-hover" id="lstComments">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;"><input onclick="selectAll(this)" type="checkbox" /></th>
+                            <th>文章</th>
+                            <th>评论人</th>
+                            <th>创建时间</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in Data">
+                            <th><input v-bind:id="item.CommentID" type="checkbox" /></th>
+                            <td> <a @mouseenter="$('#viewComment').html(marked(item.Content, { sanitize: true }))" v-bind:href="['/blog/'+item.ID+'.html']">{{item.Title}}</a></td>
+                            <td>{{item.NickName}}</td>
+                            <td>{{item.CreateTime}}</td>
+
+                        </tr>
+                </table>
+                <nav aria-label="Page navigation">
+                    <ul id="pagination" class="pagination"></ul>
+                </nav>
+            </div>
+            <div class="col-md-4" style="padding-top:50px;">
+                <div id="viewComment">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+
+    <script>
+        var lstComments;
+        $(document).ready(function () {
+            lstComments = new Vue({ el: "#lstComments", data: { Data: [] } });
+            pageChange(0);
+
+
+        });
+
+        async function delComment() {
+            var items = getSelectItems();
+            if (items.length > 0) {
+                if (confirm('是否要删除评论?')) {
+                    var result = await AdminCommentDel(items);
+                    if (result.Code == 200) {
+                        pageChange(0);
+                    }
+                    else {
+                        alert(result.Error);
+                    }
+
+                }
+            }
+            else {
+                alert('选择需要删除的评论');
+            }
+        }
+        function pageChange(index) {
+            bindVue(lstComments, AdminCommentList(index), function (c, r) {
+                c.Data = r.Data.Items;
+                pagination(index, r.Data.Pages);
+            });
+        }
+        function selectAll(e) {
+            var checkedOfAll = $(e).prop("checked");
+            $("input[type='checkbox']").prop("checked", checkedOfAll);
+        }
+
+        function getSelectItems() {
+            var items = new Array();
+            $("input[type='checkbox']").each(function () {
+                if ($(this).prop("checked") == true && $(this).prop("id"))
+                    items.push($(this).attr('id'));
+            });
+            return items;
+        }
+
+    </script>
+
+</body>
+
+</html>

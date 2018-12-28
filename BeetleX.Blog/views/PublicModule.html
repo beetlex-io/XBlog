@@ -1,0 +1,227 @@
+﻿<templates>
+    <template id="site-header">
+        <div class="container" id="siteHeader">
+            <div class="navbar-header">
+                <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" style="color:white;" href="/"> <img src="/images/home_icon.png" style="float:left;margin-top:-6px;padding-right:6px;" />{{Data.Title}}</a>
+            </div>
+            <div class="navbar-collapse collapse" role="navigation">
+                <ul class="nav navbar-nav">
+
+                    <li v-for="item in Data.Menus"><a :href="['/cate/'+item.ID+'.html']">{{item.Name}}</a></li>
+
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <form class="form-inline form-group-sm" style="padding-top:10px;padding-right:20px;">
+                            <div class="form-group">
+                                <label for="inputPassword2" class="sr-only">Password</label>
+                                <input id="txtSearch" type="text" class="form-control" placeholder="查询">
+                            </div>
+                            <a href="javascript:void(0)" onclick="blogSearch()"><img src="/images/search.png" style="width:16px;" /></a>
+                        </form>
+                    </li>
+                    <li><a href="/admin/">管理</a></li>
+                </ul>
+            </div>
+        </div>
+        <script>
+            var siteHeader;
+            siteHeader = new Vue({ el: '#siteHeader', data: { Data: { Title: '', Menus: [] } } });
+            bindVue(siteHeader, SiteGetTitleAndMenu(), function (c, r) {
+                c.Data = r.Data;
+                if (document.title)
+                    document.title = r.Data.Title + "  " + document.title;
+                else
+                    document.title = r.Data.Title;
+            });
+        </script>
+    </template>
+    <template id="topBlog">
+        <ul id="lstTopBlog">
+            <li v-for="item in Data"><a :href="['/blog/'+item.ID+'.html']"> {{item.Title}}</a></li>
+        </ul>
+        <script>
+            var lstNewBlog;
+            lstTopBlog = new Vue({ el: "#lstTopBlog", data: { Data: [] } });
+            bindVue(lstTopBlog, SiteTopBlog());
+        </script>
+    </template>
+    <template id="topComment">
+        <ul id="lstTopComment">
+            <li v-for="item in Data">
+                <a :href="['/blog/'+item.ID+'.html']"> {{item.Title}}</a>
+                <div>
+
+
+                    <span class="btn btn-xs"><img src="/images/date.png" />{{item.CreateTime}}</span>
+                    <span class="btn btn-xs">({{item.NickName}})</span>
+
+                </div>
+                <div v-html="marked(item.Content, { sanitize: true })"></div>
+
+            </li>
+        </ul>
+        <script>
+            var lstTopComment;
+            lstTopComment = new Vue({ el: "#lstTopComment", data: { Data: [] } });
+            bindVue(lstTopComment, SiteTopComment());
+        </script>
+    </template>
+
+    <template id="newBlog">
+        <ul id="lstNewBlog">
+            <li v-for="item in Data"><a :href="['/blog/'+item.ID+'.html']"> {{item.Title}}</a></li>
+        </ul>
+        <script>
+            var lstNewBlog;
+            lstNewBlog = new Vue({ el: "#lstNewBlog", data: { Data: [] } });
+            bindVue(lstNewBlog, SiteNewBlog());
+        </script>
+    </template>
+    <template id="about">
+        <div id="aboutInfo">
+            <div v-html="compiledMarkdown">
+            </div>
+        </div>
+        <script>
+            var aboutInfo;
+            aboutInfo = new Vue({
+                el: '#aboutInfo',
+                data: { Data: '' },
+                computed: {
+                    compiledMarkdown: function () {
+                        return marked(this.Data, { sanitize: true })
+                    }
+                }
+            });
+            bindVue(aboutInfo, SiteGetAbout());
+        </script>
+    </template>
+    <template id="tags">
+        <div id="lstTags">
+            <a :href="['/tag/'+encodeURIComponent(item.Name)+'.html']" v-for="(item,i) in Data"
+               :class="[getColor()]">{{item.Name}}({{item.Value}})</a>
+
+            <a href="/tags.html">更多标签...</a>
+        </div>
+        <script>
+            var lstTags;
+
+            lstTags = new Vue({ el: '#lstTags', data: { Data: [] } });
+            async function loadTags() {
+                var result = await SiteGetTags();
+                lstTags.Data = result.Data;
+            }
+            loadTags();
+        </script>
+    </template>
+    <template id="header">
+        <div class="navbar-header" style="background-color:#565555">
+            <a class="navbar-brand" href="/admin/" style="color:white;width:220px;">
+                <img src="/images/admin/admin.png" style="float:left;margin-top:-2px;margin-right:10px;" /><span>BeetleX Blog</span>
+            </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse ">
+            <ul class="nav navbar-nav main_menu">
+                <li>
+                    <a href="/"><img src="/images/admin/home.png" />返回主页</a>
+
+                </li>
+                <li>
+                    <a href="index.html"><img src="/images/admin/blog.png" />文章管理</a>
+
+                </li>
+                <li><a href="categories.html"><img src="/images/admin/cate.png" />分类管理</a></li>
+
+
+                <li><a href="comments.html"><img src="/images/admin/talk.png" />留言管理</a></li>
+                <li><a href="files.html"><img src="/images/admin/file.png" />文件管理</a></li>
+                <li><a href="system.html"><img src="/images/admin/system.png" />系统资源</a></li>
+                <li><a href="connections.html"><img src="/images/admin/connections.png" />在线连接</a></li>
+                <li><a href="setting.html"><img src="/images/admin/setting.png" />设置</a></li>
+                <li><a href="/admin/setting/Signout"><img src="/images/admin/exit.png" />退出</a></li>
+            </ul>
+
+        </div>
+    </template>
+
+
+    <template id="footer">
+        <div class="blog-footer">
+            <hr />
+            <p>BeetleX Blog Copyright © 2018 ikende.com email:henryfan@msn.com <a href="https://github.com/ikende" target="_blank">github.com</a></p>
+        </div>
+    </template>
+
+    <template id="system_info">
+        <div id="serverInfo">
+            <div class="panel-body" style="height:60px;padding:1px;">
+                <canvas width="400" height="70" id="cpuCanavas" style="width:100%;height:100%;"></canvas>
+            </div>
+
+            <div class="panel-body" style="height:60px;padding:1px;">
+                <canvas width="400" height="70" id="requestCanvas" style="width:100%;height:100%;"></canvas>
+            </div>
+
+            <div class="panel-body" style="height:60px;padding:1px;">
+                <canvas width="400" height="70" id="networkCanvas" style="width:100%;height:100%;"></canvas>
+            </div>
+
+            <script>
+                var cpuMonitor;
+                var cpu;
+                var requestMonitor;
+                var request;
+                var networkMonitor;
+                var netInput;
+                var netOutput;
+                var serverInfoControl;
+                serverInfoControl = new Vue({
+                    el: '#serverInfo',
+                    data: {
+                        Data: {}
+                    }
+                });
+                async function GetServerInfo() {
+                    var result = await SiteGetServerInfo();
+                    serverInfoControl.Data = result.Data;
+                    cpu.push(result.Data.Cpu);
+                    cpuMonitor.draw();
+                    request.push(result.Data.RequestPer);
+                    requestMonitor.draw();
+
+                    netInput.push(result.Data.ReceiveBytesPer);
+                    netOutput.push(result.Data.SendBytesPer);
+                    networkMonitor.draw();
+                }
+
+                cpuMonitor = new Monitor('cpuCanavas');
+                cpu = cpuMonitor.create();
+                cpu.label = "Cpu";
+                requestMonitor = new Monitor('requestCanvas');
+                request = requestMonitor.create();
+                request.maxValue = 5000;
+                request.changeMaxValue = true;
+                request.label = "Request";
+
+                networkMonitor = new Monitor('networkCanvas');
+                netInput = networkMonitor.create();
+                netInput.maxValue = 10;
+                netInput.label = "Network Input(MB)";
+
+                netOutput = networkMonitor.create();
+                netOutput.maxValue = 10;
+                netOutput.label = "Network Output(MB)";
+
+                GetServerInfo();
+                setInterval(function () { GetServerInfo(); }, 1000);
+            </script>
+        </div>
+    </template>
+</templates>

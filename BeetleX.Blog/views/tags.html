@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/site.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <link rel="stylesheet"
+          href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.13.1/build/styles/default.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.13.1/build/highlight.min.js"></script>
+    <script src="/js/highlight_pack.js"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/Site.js"></script>
+    <script src="/js/Monitor.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+
+    <title></title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="site-header">
+
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+            <div class="col-md-8" role="main">
+                <div id="lstAllTags">
+                    <a :href="['/tag/'+encodeURIComponent(item.Name)+'.html']" v-for="(item,i) in Data"
+                       :class="[getColor()]">{{item.Name}}({{item.Value}})</a>
+                </div>
+                <script>
+                    var lstAllTags;
+
+                    lstAllTags = new Vue({ el: '#lstAllTags', data: { Data: [] } });
+                    async function loadTags() {
+                        var result = await SiteGetAllTags();
+                        lstAllTags.Data = result.Data;
+                    }
+                    loadTags();
+                </script>
+            </div>
+            <div class="col-md-4 leftPack">
+
+                <h4>关于</h4>
+                <div slot="about"> </div>
+                <h4>系统资源</h4>
+                <div slot="system_info"> </div>
+                <h4>热门标签</h4>
+                <div slot="tags"></div>
+                <h4>置顶</h4>
+                <div slot="topBlog"></div>
+                <h4>最新文章</h4>
+                <div slot="newBlog"></div>
+                <h4>最新评论</h4>
+                <div slot="topComment"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+
+    <script>
+
+        var btnStyles = ["btn btn-default btn-xs", "btn btn-primary btn-xs",
+            "btn btn-success btn-xs", "btn btn-default btn-xs", "btn btn-info btn-xs", "btn btn-warning btn-xs", "btn btn-default btn-xs", "btn btn-danger btn-xs"];
+        var colorIndex = 0;
+        function getColor() {
+            colorIndex++;
+            return btnStyles[colorIndex % btnStyles.length];
+        }
+
+        function blogSearch() {
+            var text = $('#txtSearch').val();
+
+            if (text) {
+                window.location.href = "/search/" + encodeURIComponent(text) + ".html";
+            }
+        }
+    </script>
+</body>
+
+</html>

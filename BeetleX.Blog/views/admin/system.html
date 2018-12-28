@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminSetting.js"></script>
+    <script src="/js/Monitor.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>系统资源</h3>
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+
+            <div style="margin:auto;text-align:center;padding-left:15px;">
+                <div id="serverStatus" style="text-align:left;width:500px;margin:auto;">
+                    <p class="pline"><span class="valueLabel">服务名称:</span> <label class="values"> <span class="badge ">{{Data.ServerName}}</span></label></p>
+
+                    <p class="pline">
+                        <span class="valueLabel">服务地址:</span>  <label class="values">
+                            <span class="badge">{{Data.Host}}@{{Data.Port}}</span>
+                        </label>
+                        <span class="valueLabel">运行时长:</span><span class="badge ">{{Data.RunTime}}</span>
+                    </p>
+                    <p class="pline">
+                        <span class="valueLabel">CPU:</span>  <label class="values">
+                            <span class="badge">{{Data.Cpu}}%</span>
+                        </label>
+                        <span class="valueLabel">内存:</span><span class="badge ">{{Data.Memory}}KB</span>
+                    </p>
+                    <p class="pline">
+                        <span class="valueLabel">总处理连接:</span>  <label class="values">
+                            <span class="badge ">{{Data.TotalConnections}}</span>
+                        </label>
+                        <span class="valueLabel">活跃连接:</span> <span class="badge ">{{Data.CurrentConnectinos}}</span>
+                        <span class="valueLabel">处理连接:</span> <span class="badge ">{{Data.ConnectionsPer}}/秒</span>
+                    </p>
+                    <p class="pline">
+                        <span class="valueLabel">处理请求:</span>
+                        <label class="values">
+                            <span class="badge "> {{Data.RequestPer}}/秒</span>
+                        </label>
+                        <span class="valueLabel">总处理请求:</span>
+                        <span class="badge ">{{Data.TotalRequest}}</span>
+                    </p>
+                    <p class="pline">
+                        <span class="valueLabel">接收字节:</span>
+                        <label class="values">
+                            <span class="badge ">{{Data.ReceiveBytesPer}}MB/秒</span>
+                        </label>
+                        <span class="valueLabel">总接收字节:</span>
+                        <span class="badge ">{{Data.TotalReceiveBytes}}MB</span>
+                    </p>
+                    <p>
+                    <p>
+                        <span class="valueLabel">发送字节:</span>
+                        <label class="values">
+                            <span class="badge ">{{Data.SendBytesPer}}MB/秒</span>
+                        </label>
+                        <span class="valueLabel">总发送字节:</span>
+                        <span class="badge ">{{Data.TotalSendBytes}}MB</span>
+                    </p>
+
+                </div>
+
+                <div class="panel-body" style="padding:0px;margin:0px;">
+                    <canvas width="800" height="100" id="cpuCanavas" style="padding:0px;"></canvas>
+                </div>
+
+                <div class="panel-body" style="padding:0px;margin:0px;">
+                    <canvas width="800" height="100" id="requestCanvas" style="padding:0px;"></canvas>
+                </div>
+
+                <div class="panel-body" style="padding:0px;margin:0px;">
+                    <canvas width="800" height="120" id="networkCanvas" style="padding:0px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+    <script>
+        var statusControl;
+        var settingControl;
+        var lstLogControl;
+        var logs = new Array();
+        var cpuMonitor;
+        var cpu;
+        var requestMonitor;
+        var request;
+        var networkMonitor;
+        var netInput;
+        var netOutput;
+
+        var setting = {
+            MaxConn: 0,
+            WSMaxRPS: 0,
+            LogLevel: '',
+            LogToConsole: true,
+            WriteLog: false
+        }
+        api_receive(function (data) {
+            if (data.Data.LogType) {
+                logs.splice(0, 0, data.Data);
+                if (logs.length > 500)
+                    logs.pop();
+
+            }
+        });
+        $(document).ready(function () {
+            statusControl = new Vue({ el: '#serverStatus', data: { Data: {} } });
+            cpuMonitor = new Monitor('cpuCanavas');
+            cpu = cpuMonitor.create();
+            cpu.label = "Cpu";
+            requestMonitor = new Monitor('requestCanvas');
+            request = requestMonitor.create();
+            request.maxValue = 5000;
+            request.changeMaxValue = true;
+            request.label = "Request";
+
+            networkMonitor = new Monitor('networkCanvas');
+            netInput = networkMonitor.create();
+            netInput.maxValue = 10;
+            netInput.label = "Network Input(MB)";
+
+            netOutput = networkMonitor.create();
+            netOutput.maxValue = 10;
+            netOutput.label = "Network Output(MB)";
+
+            GetStatus();
+            setInterval(GetStatus, 1000);
+
+        });
+
+
+        async function GetStatus() {
+            bindVue(statusControl, AdminSettingGetServerInfo(),
+                function (c, r) {
+                    statusControl.Data = r.Data;
+                    cpu.push(r.Data.Cpu);
+                    cpuMonitor.draw();
+                    request.push(r.Data.RequestPer);
+                    requestMonitor.draw();
+
+                    netInput.push(r.Data.ReceiveBytesPer);
+                    netOutput.push(r.Data.SendBytesPer);
+                    networkMonitor.draw();
+                });
+        }
+    </script>
+</body>
+
+</html>

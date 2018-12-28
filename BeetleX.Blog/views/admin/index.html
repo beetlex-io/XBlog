@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminBlog.js"></script>
+    <script src="/js/admin/AdminCategory.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>文章管理</h3>
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row" id="lstDoc">
+            <div style="padding:5px;">
+                <form class="form-inline form-group-sm">
+                    <a href="blogeditor.html" class="btn btn-default btn-sm">新建</a>
+                    <a href="javascript:void(0)" onclick="deleteDoc()" class="btn btn-default btn-sm">删除</a>
+                    <div class="form-group " style="margin-left:20px;">
+                        <label class="control-label">分类</label>
+                        <select class="form-control" v-model="Category">
+                            <option value="0">所有</option>
+                            <option v-for="item in Categories" :value="item.ID">{{item.Name}}</option>
+                        </select>
+                    </div>
+                    <button type="button" onclick="search(0)" class="btn btn-default btn-sm">查询</button>
+                    <button type="button" onclick="syncData()" class="btn btn-default btn-sm">同步所有数据</button>
+                </form>
+            </div>
+
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width:20px;"><input onclick="selectAll(this)" type="checkbox" /></th>
+                        <th>至顶</th>
+
+                        <th>标题</th>
+                        <th>分类</th>
+                        <th>创建时间</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in Data">
+                        <td><input v-bind:id="item.ID" type="checkbox" /></td>
+                        <td style="width:50px;"></td>
+                        <td> <a v-bind:href="['blogeditor.html?id='+item.ID]">{{item.Title}}</a></td>
+                        <td style="width:120px;">{{item.Category}}</td>
+                        <td style="width:150px;">{{item.CreateTime}}</td>
+                        <td></td>
+                    </tr>
+            </table>
+            <nav aria-label="Page navigation">
+                <ul id="pagination" class="pagination">
+                    <li>
+                        <a href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li><a href="javascript:void(0)" onclick="search(0)">1</a></li>
+                    <li>
+                        <a href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+    <script>
+        var lstDoc;
+        $(document).ready(function () {
+            lstDoc = new Vue({ el: '#lstDoc', data: { Data: [], Categories: [], Category: 0 } });
+            search(0);
+            bindVue(lstDoc, AdminCategoryList(), function (c, r) { c.Categories = r.Data });
+        });
+
+        function getSelectItems() {
+            var items = new Array();
+            $("input[type='checkbox']").each(function () {
+                if ($(this).prop("checked") == true && $(this).prop("id"))
+                    items.push($(this).attr('id'));
+            });
+            return items;
+        }
+
+        async function syncData() {
+            if (confirm('是否同步所有文章到索引中?')) {
+                var result = await AdminBlogAllSyncToES();
+                if (result.Code == 200) {
+                    alert('数据同步成功！');
+                }
+                else {
+                    alert(result.Error);
+                }
+            }
+        }
+
+        function selectAll(e) {
+            var checkedOfAll = $(e).prop("checked");
+            $("input[type='checkbox']").prop("checked", checkedOfAll);
+        }
+
+
+        async function deleteDoc() {
+            var items = getSelectItems();
+            if (items.length > 0) {
+                if (confirm('是否要删除选择的文章?')) {
+                    var result = await AdminBlogDelete(items);
+                    if (result.Code == 200) {
+                        search(0);
+                    }
+                    else {
+                        alert(result.Error);
+                    }
+                }
+            }
+            else {
+                alert("选择需要删除的文章?");
+            }
+        }
+
+        function pageChange(index) {
+            search(index);
+        }
+
+        async function search(index) {
+            bindVue(lstDoc, AdminBlogList(lstDoc.Category, index),
+                function (c, r) {
+                    c.Data = r.Data.Items;
+                    pagination(index, r.Data.Pages);
+                });
+
+        }
+    </script>
+</body>
+
+</html>

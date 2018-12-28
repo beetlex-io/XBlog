@@ -1,0 +1,288 @@
+﻿body {
+}
+
+.navbar {
+    border-radius: 0px;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+    text-shadow: none;
+    color: #ffffff;
+    font-size: 11pt;
+}
+
+    .navbar-inverse .navbar-nav > li > a:hover {
+        background-color: #a2d5fb;
+        color: #0472c6;
+    }
+
+#siteHeader {
+    padding-left: 0px;
+}
+
+.navbar-inverse {
+    background-color: #35a8ff;
+    background-image: none;
+    border: none;
+    margin-bottom: 0px;
+    color: white;
+}
+
+.navbar-header {
+    background-color: #0472c6;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+    .navbar-header a {
+        color: white;
+    }
+
+#lstTags a {
+    margin: 2px;
+}
+
+.leftPack {
+    margin-top: 10px;
+    border-left: dotted;
+    border-left-width: 1px;
+}
+
+    .leftPack h4 {
+        border-bottom: solid;
+        border-bottom-width: 1px;
+        padding-bottom: 4px;
+        margin-top: 10px;
+        border-bottom-color: #e2e2e2;
+        margin-bottom: 6px;
+    }
+
+#lstNewBlog {
+    margin-left: 0px;
+    padding-left: 20px;
+}
+
+    #lstNewBlog a {
+        color: #0472c6;
+    }
+
+#lstTopBlog {
+    margin-left: 0px;
+    padding-left: 20px;
+}
+
+
+    #lstTopBlog a {
+        color: #0472c6;
+    }
+
+#lstTopComment {
+    margin-left: 0px;
+    padding-left: 20px;
+}
+
+    #lstTopComment a {
+        color: #0472c6;
+    }
+
+    #lstTopComment li {
+        margin-bottom: 4px;
+    }
+
+#lstAllTags {
+    padding-top: 20px;
+}
+
+    #lstAllTags a {
+        padding: 6px;
+        margin: 4px;
+    }
+
+a {
+    color: #484646;
+}
+
+    a:hover {
+        text-decoration: none;
+        color: #35a8ff
+    }
+
+.blog-item {
+    border: none;
+}
+
+    .blog-item h4 {
+        font-size: 12pt;
+        border-bottom: dotted;
+        border-bottom-width: 1px;
+        padding-bottom: 10px;
+        margin-bottom: 6px;
+        border-bottom-color: #9a9a9a;
+    }
+
+    .blog-item img {
+        margin-top: -3px;
+        padding-right: 2px;
+        padding-left: 4px;
+    }
+
+    .blog-item a {
+        margin-right: 4px;
+    }
+
+
+.blog-Detail h4 {
+    font-size: 12pt;
+    border-bottom: dotted;
+    border-bottom-width: 1px;
+    padding-bottom: 10px;
+    border-bottom-color: #9a9a9a;
+    margin-bottom: 6px;
+}
+
+.blog-Detail img {
+    margin-top: -3px;
+    padding-right: 2px;
+    padding-left: 4px;
+}
+
+.blog-Detail a {
+    margin-right: 4px;
+}
+
+.blog-Body p {
+    line-height: 22px;
+}
+
+.blog-Body h1, .blog-Body h2, .blog-Body h3, .blog-Body h4, .blog-Body h5, .blog-Body h6, .blog-Body h7 {
+    margin: 0px;
+    padding: 0px;
+    margin-bottom: 6px;
+}
+
+.blog-Body h1 {
+    font-size: 16pt;
+}
+
+.blog-Body h2 {
+    font-size: 15pt;
+}
+
+.blog-Body h3 {
+    font-size: 14pt;
+}
+
+.blog-Body h4 {
+    font-size: 13pt;
+}
+
+.blog-Body h5 {
+    font-size: 12pt;
+}
+
+.blog-Body img {
+    max-width: 100%;
+}
+
+.blog-Body pre {
+    padding: 0px;
+}
+
+.comment-header {
+    border-bottom-width: 1px;
+    border-bottom-style: dotted;
+    border-bottom-color: black;
+    padding: 4px;
+    margin-bottom: 4px;
+}
+
+    .comment-header a {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .comment-header img {
+        margin-top: -4px;
+        margin-right: 6px;
+    }
+
+pre {
+    background-color: white;
+    border-color: #808080;
+    padding: 4px;
+}
+
+code {
+    line-height: 20px;
+}
+
+
+
+/*
+
+Visual Studio-like style based on original C# coloring by Jason Diamond <jason@diamond.name>
+
+*/
+.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background: white;
+    color: black;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-variable {
+    color: #008000;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+    color: #00f;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-addition {
+    color: #a31515;
+}
+
+.hljs-deletion,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-meta {
+    color: #2b91af;
+}
+
+.hljs-doctag {
+    color: #808080;
+}
+
+.hljs-attr {
+    color: #f00;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+    color: #00b0e8;
+}
+
+
+.hljs-emphasis {
+    font-style: italic;
+}
+
+.hljs-strong {
+    font-weight: bold;
+}

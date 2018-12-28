@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/AdminController.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" style="background-color:#9f9e9e;background-image:none;border:none;" slot="header">
+
+    </div>
+
+
+    <div class="container bs-docs-container" style="padding-top:0px;">
+        <div class="row">
+            <ul class="nav nav-tabs" slot="admin-manager-nav"></ul>
+
+
+            <div style="padding:5px;">
+                <form class="navbar-form navbar-left btn-group-sm" style="display:contents;margin-bottom:4px;" role="search">
+                    <a href="DocEditor.html" class="btn btn-default">添加</a>
+                    <a href="javascript:void(0)" onclick="deleteDoc()" class="btn btn-default">删除</a>
+
+                </form>
+            </div>
+
+            <table class="table table-hover" id="lstDoc">
+                <thead>
+                    <tr>
+                        <th style="width:40px;"><input onclick="selectAll(this)" type="checkbox" /></th>
+                        <th>标签</th>
+                        <th>标题</th>
+                        <th>创建时间</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in Data">
+                        <th><input v-bind:id="item.ID" type="checkbox" /></th>
+                        <td>{{item.Tag}}</td>
+                        <td> <a v-bind:href="['DocEditor.html?ID='+item.ID]">{{item.Title}}</a></td>
+                        <td>{{item.CreateTime}}</td>
+                        <td><a v-bind:href="['Comment.html?ID='+item.ID]">查看疑问</a></td>
+                    </tr>
+            </table>
+            <nav aria-label="Page navigation">
+                <ul id="pagination" class="pagination">
+                    <li>
+                        <a href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li><a href="javascript:void(0)" onclick="search(0)">1</a></li>
+                    <li>
+                        <a href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+
+</body>
+
+</html>

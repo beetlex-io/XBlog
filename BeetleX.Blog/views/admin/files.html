@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/FileManagerController.js"></script>
+    <script src="/js/ReadFileHandler.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>文件管理</h3>
+    </div>
+    <div class="container bs-docs-container">
+
+        <div class="row">
+            <form class="navbar-form navbar-left btn-group-sm" style="margin-bottom:4px;" role="search">
+                <div class="form-group">
+                    <input id="folderName" type="text" class="form-control" placeholder="文件夹名称">
+                </div>
+                <a href="javascript:void(0)" class="btn btn-default" onclick="CreateFolder()">添加文件夹</a>
+
+            </form>
+        </div>
+        <div class="row">
+            <div class="col-md-7">
+                <div style="padding:6px;padding-left:0px;">
+                    <ul class="list-group" id="lstDoc">
+                        <li class="list-group-item" v-for="item in Data">
+                            <a v-if="item.Name != '/' && item.Name !='\\'" href="javascript:void(0)" v-on:click="DeleteResource(item.Name,item.IsFile)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                            <span v-if="item.IsFile==true" class="glyphicon glyphicon-link" aria-hidden="true"></span>
+                            <span v-else class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+                            <a v-if="item.IsFile==true" v-bind:href="[item.Url+'?tag=manager']" target="_blank" style="padding-left:4px;">{{item.Name}}</a>
+                            <a v-else href="javascript:void(0)" v-on:click="enterFolder(item.Path)" style="padding-left:4px;">{{item.Name}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <input id="upfile" type="file" multiple="multiple" class="file">
+                </div>
+                <div id="updateBars">
+                    <div v-for="item in Data" class="progress" style="margin:0px;margin-top:6px;">
+                        <div class="progress-bar progress-bar-success" v-bind:width="[item.percent+'%']" v-bind:style="{width:item.percent+'%'}">
+                            {{item.name}}({{item.percent}}%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+    <script>
+        var root = '';
+        var uploadItems = new Array();
+        var lstDocControl;
+        var lstUploadControl;
+        $(document).ready(function () {
+            lstDocControl = new Vue({ el: '#lstDoc', data: { Data: [] } });
+            lstUploadControl = new Vue({ el: '#updateBars', data: { Data: uploadItems } });
+            listResource();
+            $('#upfile').change(function handleFileSelect(evt) {
+                if (evt.target.files && evt.target.files.length > 0) {
+                    var files = evt.target.files;
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        var rf = new readFileHandler(file);
+                        uploadItems.push(rf);
+                        uploadFile(rf);
+                    }
+                }
+            });
+        });
+
+        function removeUpload(rf) {
+            setTimeout(function () {
+                var i = uploadItems.indexOf(rf);
+                if (i != -1) {
+                    uploadItems.splice(i, 1);
+                }
+            }, 2000);
+        }
+
+        async function uploadFile(rf) {
+            if (rf.completed() != true) {
+                // console.log(rf.name + " updating:" + rf.index);
+                var data = await rf.read();
+                if (!data.errCode) {
+                    var result = await FileManagerUploadFile(root, data);
+                    // console.log(rf.name + " uploadstate " + result.Code);
+
+                    if (result.Code != 200) {
+                        alert(result.Error);
+                        removeUpload(rf);
+                        return;
+                    }
+                    else {
+                        if (data.Eof == true) {
+                            removeUpload(rf);
+                            listResource();
+                        }
+                        else {
+                            uploadFile(rf);
+                        }
+                    }
+                }
+                else {
+                    removeUpload(rf);
+                    alert(data.name);
+                }
+            }
+            else {
+                removeUpload(rf);
+            }
+        }
+
+        function enterFolder(name) {
+            if (name == '/')
+                root = '';
+            else
+                root = name;
+            listResource();
+        }
+
+        async function DeleteResource(name, isfile) {
+            if (confirm('是否要删除文件（' + name + '）')) {
+                var result = await FileManagerDeleteResource(root, name, isfile);
+                if (result.Code == 403) {
+                    window.location.href = result.Data;
+                }
+                else {
+                    listResource();
+                }
+            }
+        }
+
+        async function CreateFolder() {
+            if (!$('#folderName').val()) {
+                alert("请输入文件夹名称!")
+                return;
+            }
+            var result = await FileManagerCreateFolder(root, $('#folderName').val());
+            if (result.Code == 403) {
+                window.location.href = result.Data;
+            }
+            else {
+                $('#folderName').val('');
+                listResource();
+            }
+        }
+
+        async function listResource() {
+            bindVue(lstDocControl, FileManagerList(root));
+        }
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,30 @@
+{
+  "HttpConfig": {
+    "BufferPoolMaxMemory": 500,
+    "SessionTimeOut": 3600,
+    "UseIPv6": true,
+    "UrlIgnoreCase": true,
+    "PacketCombined": 0,
+    "FileManager": false,
+    "FileManagerPath": null,
+    "LogToConsole": true,
+    "NotLoadFolder": "\\Files;\\Images",
+    "CacheFiles": "html;htm;js;css",
+    "CacheFileSize": 500,
+    "LogLevel": 8,
+    "WebSocketMaxRPS": 100,
+    "BufferSize": 8096,
+    "NoGzipFiles": "jpg;jpeg;png;gif;png;ico;zip;rar;bmp",
+    "MaxConnections": 2000,
+    "Manager": "admin",
+    "ManagerPWD": "123456",
+    "WriteLog": true,
+    "Host": "",
+    "Debug": false,
+    "Port": 8080,
+    "MaxBodyLength": 2097152,
+    "OutputStackTrace": false,
+    "StaticResurceType": "txt;xml;zip;jpg;css;png;htm;woff;svg;gif;woff2;js;html;jpeg;ico;rar",
+    "DefaultPage": "index.html;index.htm"
+  }
+}

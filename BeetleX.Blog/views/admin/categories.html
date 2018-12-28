@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminCategory.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>分类管理</h3>
+    </div>
+    <div class="container bs-docs-container" >
+        <div class="row">
+
+            <div style="padding:5px;">
+                <form class="form-inline form-group-sm" id="cateCreater">
+                    <div class="form-group">
+                        <label for="exampleInputName2">名称</label>
+                        <input type="text" class="form-control" v-model:value="title" placeholder="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail2">描述</label>
+                        <input type="text" style="width:250px;" v-model:value="remark" class="form-control" placeholder="remark">
+                    </div>
+                    <button type="button" onclick="Add();" class="btn  btn-default btn-sm">添加</button>
+                </form>
+            </div>
+            <table class="table table-hover" id="lstCate">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>名称</th>
+                        <th>描述</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,index) in Data">
+                        <td style="width:30px;">
+                            <a href="javascript:void(0)" v-on:click="OrderBy(item.ID,true,index)"><img src="/images/admin/up.png" /></a>
+                        </td>
+                        <td style="width:200px;">{{item.Name}}</td>
+                        <td> {{item.Remark}}</td>
+                        <td style="width:60px;"><a href="javascript:void(0)" v-on:click="Delete(item.ID)">删除</a></td>
+                    </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+
+    <script>
+        var cateCreater;
+        var lstCate;
+        $(document).ready(function () {
+            lstCate = new Vue({ el: '#lstCate', data: { Data: [] } });
+            cateCreater = new Vue({
+                el: '#cateCreater',
+                data: {
+                    remark: '',
+                    title: ''
+                }
+            });
+            List();
+        });
+
+        async function OrderBy(id, up, index) {
+            if (index == 0)
+                return;
+            var result = await AdminCategoryOrder(id, up);
+            if (result.Code == 200) {
+                List();
+            }
+            else {
+                alert(result.Error);
+            }
+        }
+
+        async function Delete(id) {
+            if (confirm('是否要删除分类?')) {
+                var result = await AdminCategoryDel(id);
+                if (result.Code == 200) {
+                    List();
+                }
+                else {
+                    alert(result.Error);
+                }
+            }
+        }
+
+        async function List() {
+             bindVue(lstCate, AdminCategoryList());         
+        }
+
+        async function Add() {
+            if (!cateCreater.title) {
+                alert("请输入分类名称!");
+                return;
+            }
+            if (!cateCreater.remark) {
+                alert("请输入分类描述!");
+                return;
+            }
+            var result = await AdminCategoryAdd(cateCreater.title, cateCreater.remark);
+            if (result.Code == 200) {
+                cateCreater.title = '';
+                cateCreater.remark = '';
+                List();
+            }
+            else {
+                alert(result.Error);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

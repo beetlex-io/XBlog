@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminBlog.js"></script>
+    <script src="/js/admin/AdminCategory.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>文章编辑</h3>
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+            <form class="form-horizontal" id="blogEditor">
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">标题</label>
+                    <div class="col-sm-10">
+                        <input type="text" v-model:value="title" class="form-control" placeholder="标题">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-1 col-sm-10" style="margin-bottom:6px;">
+                        <button type="button" onclick="$('#txtEditor').show(); $('#txtView').hide()" class="btn  btn-default btn-sm">编辑</button>
+                        <button type="button" onclick="$('#txtEditor').hide(); $('#txtView').show()" class="btn  btn-default btn-sm">预览</button>
+                        <a class="btn  btn-default btn-sm" href="https://postimages.org/" target="_blank">图片上传</a>
+                        支持Markdown内容
+                    </div>
+
+
+
+                    <div id="txtEditor" class="col-sm-offset-1 col-sm-10">
+                        <textarea :value="content" @input="update" rows="25" style="width:100%"></textarea>
+                    </div>
+                    <div id="txtView" style="display:none;height:500px;overflow-y: auto; overflow-x:hidden;" class="col-sm-offset-1 col-sm-10" v-html="compiledMarkdown">
+
+                    </div>
+
+
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-1 col-sm-10">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" v-model="top"> 置顶
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">分类</label>
+                    <div class="col-sm-10">
+                        <select class="form-control" v-model="category">
+                            <option v-for="item in categories" :value="item.ID">{{item.Name}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">标签</label>
+                    <div class="col-sm-10">
+                        <input type="text" v-model:value="tags" class="form-control" placeholder="标签以空格分隔">
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label class="col-sm-1 control-label">来源</label>
+                    <div class="col-sm-10">
+                        <input type="text" v-model:value="sourceUrl" class="form-control" placeholder="标题">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-1 col-sm-10">
+                        <button type="button" onclick="Save()" class="btn btn-default">保存</button>
+                    </div>
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+    <script>
+        var blogEditor;
+        var id;
+        $(document).ready(function () {
+            blogEditor = new Vue({
+                el: '#blogEditor',
+                data: { content: '', title: '', tags: '', sourceUrl: '', category: 0, categories: [], top: false },
+                computed: {
+                    compiledMarkdown: function () {
+                        return marked(this.content, { sanitize: true })
+                    }
+                },
+                methods: {
+                    update: _.debounce(function (e) {
+                        this.content = e.target.value
+                    }, 300)
+                }
+
+            });
+            id = getUrlVars()["id"];
+            if (!id)
+                id = 0;
+            else
+                LoadBlog();
+            ListCategories();
+        });
+        async function LoadBlog() {
+            var result = await AdminBlogGet(id);
+            if (result.Code == 200) {
+                blogEditor.content = result.Data.Content;
+                blogEditor.category = result.Data.CategoryID;
+                blogEditor.sourceUrl = result.Data.SourceUrl;
+                blogEditor.tags = result.Data.Tags;
+                blogEditor.top = result.Data.Top;
+                blogEditor.title = result.Data.Title;
+            }
+            else {
+                alert(result.Error);
+            }
+        }
+        async function ListCategories() {
+            var result = await AdminCategoryList();
+            blogEditor.categories = result.Data;
+        }
+
+
+
+        async function Save() {
+            var summary = $('#txtView').text();
+            if (summary.length > 150)
+                summary = summary.substring(0, 150);
+            summary += "...";
+            if (!blogEditor.title) {
+                alert('请输入文章标题！');
+                return;
+            }
+            if (!blogEditor.content) {
+                alert('请输入文章内容！');
+                return;
+            }
+            var result = await AdminBlogModify(id, blogEditor.title, blogEditor.top, blogEditor.tags,
+                blogEditor.category, blogEditor.sourceUrl, blogEditor.content, summary);
+            if (result.Code == 200) {
+                window.location.href = 'index.html';
+            }
+            else {
+                alert(result.Error);
+            }
+        }
+        function getUrlVars() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for (var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminSetting.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>在线连接</h3>
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+
+            <form class="bs-example btn-group-sm" data-example-id="btn-tags" style="padding:4px;">
+                <button type="button" class="btn btn-default" onclick="searchConn(0)">刷新</button>
+                <button type="button" class="btn btn-default" onclick="disconnect()">关闭</button>
+                <span id="connections" class="badge"></span>
+            </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;"><input type="checkbox" onclick="selectAll(this)" /></th>
+                        <th style="width:80px;">ID</th>
+                        <th style="width:120px;">IPAddress</th>
+                        <th style="width:120px;">Type</th>
+
+                        <th>Name</th>
+                        <th>Live Time</th>
+                    </tr>
+                </thead>
+                <tbody id="lstConnection">
+                    <tr v-for="item in Data">
+                        <td><input type="checkbox" v-bind:id="item.ID" v-bind:ip="item.IPAddress" /></td>
+                        <td>{{item.ID}}</td>
+                        <td>{{item.IPAddress}}</td>
+                        <td>{{item.Type}}</td>
+
+                        <td>{{item.Name}}</td>
+                        <td>{{item.CreateTime}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation">
+                <ul id="pagination" class="pagination"></ul>
+            </nav>
+
+        </div>
+    </div>
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+    <script>
+        function selectAll(e) {
+            var checkedOfAll = $(e).prop("checked");
+            $("input[type='checkbox']").prop("checked", checkedOfAll);
+        }
+
+        function getSelectItems() {
+            var items = new Array();
+            $("input[type='checkbox']").each(function () {
+                if ($(this).prop("checked") == true && $(this).prop("id"))
+                    items.push($(this).attr('id'));
+            });
+            return items;
+        }
+
+        async function disconnect() {
+            var items = getSelectItems();
+            if (items.length > 0) {
+                if (confirm('是否要删除连接?')) {
+                    var sessions = getSelectItems();
+                    if (sessions.length > 0) {
+                        var result = await AdminSettingCloseSession(sessions);
+                        if (result.Code == 200) {
+                            searchConn(0);
+                        }
+                        else {
+                            alert(result.Error);
+                        }
+                    }
+                }
+            }
+            else {
+                alert('选择需要删除的连接');
+            }
+        }
+        var lstConnectionControl;
+        $(document).ready(function () {
+            lstConnectionControl = new Vue({ el: '#lstConnection', data: { Data: [] } });
+            searchConn(0);
+        });
+
+        function pageChange(index) {
+            searchConn(index);
+        }
+
+        async function searchConn(index) {
+            bindVue(lstConnectionControl, AdminSettingListConn(index), function (c, r) {
+                c.Data = r.Data.Items;
+                pagination(index, r.Data.Pages);
+            });
+        }
+
+
+    </script>
+</body>
+
+</html>
