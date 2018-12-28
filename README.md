@@ -6,3 +6,7 @@
 
 ### 部署
 [XBlog介绍和部署](https://www.ikende.com/blog/90.html)
+
+![](https://i.imgur.com/AkHMDam.png)
+![](https://i.imgur.com/K9MAypS.png)
+![](https://i.imgur.com/1k4vgV8.png)
