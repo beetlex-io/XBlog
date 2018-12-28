@@ -16,8 +16,6 @@
     "BufferSize": 8096,
     "NoGzipFiles": "jpg;jpeg;png;gif;png;ico;zip;rar;bmp",
     "MaxConnections": 2000,
-    "Manager": "admin",
-    "ManagerPWD": "123456",
     "WriteLog": true,
     "Host": "",
     "Debug": false,
