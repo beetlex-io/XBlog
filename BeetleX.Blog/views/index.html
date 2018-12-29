@@ -42,7 +42,7 @@
                                 <span v-else class="label label-success">原</span> <a v-bind:href="['/blog/'+item.ID+'.html']">{{item.Title}}</a>
                             </h4>
                             <div style="margin-bottom:6px;">
-                                <a class="btn btn-xs"><img src="/images/date.png" />{{item.CreateTime}}</a>
+                                <span class="btn btn-xs"><img src="/images/date.png" />{{item.CreateTime}}</span>
                                 <a :href="['/cate/'+item.CategoryID+'.html']"><img src="/images/category.png" /> {{item.Category}}</a>
                                 <img src="/images/tags.png" />
                                 <a v-for="tag in item.Tags" :href="['/tag/'+encodeURIComponent(tag)+'.html']" :class="[getColor()]">{{tag}}</a>
@@ -113,39 +113,27 @@
         }
 
         function search(index) {
+            var cate = null;
+            var search = null;
+            var tag = null;
             if (_url.fileNameWithOutExt) {
                 if (_url.folder.indexOf("search") >= 0) {
-                    bindVue(lstBlogControl, SiteSearch(null, null, _url.fileNameWithOutExt, index), function (c, r) {
-                        c.Data = r.Data.Items;
-                        pagination(index, r.Data.Pages);
-                    })
+                    search = _url.fileNameWithOutExt;
                 }
                 else if (_url.folder.indexOf("tag") >= 0) {
-                    bindVue(lstBlogControl, SiteSearch(null, _url.fileNameWithOutExt, null, index), function (c, r) {
-                        c.Data = r.Data.Items;
-                        pagination(index, r.Data.Pages);
-                    })
+                    tag = _url.fileNameWithOutExt;
                 }
                 else if (_url.folder.indexOf("cate") >= 0) {
-                    bindVue(lstBlogControl, SiteSearch(_url.fileNameWithOutExt, null, null, index), function (c, r) {
-                        c.Data = r.Data.Items;
-                        pagination(index, r.Data.Pages);
-                    })
+                    cate = _url.fileNameWithOutExt;
                 }
                 else {
-                    bindVue(lstBlogControl, SiteSearch(null, null, null, index), function (c, r) {
-                        c.Data = r.Data.Items;
-                        pagination(index, r.Data.Pages);
-                    })
                 }
-
             }
-            else {
-                bindVue(lstBlogControl, SiteSearch(null, null, null, index), function (c, r) {
-                    c.Data = r.Data.Items;
-                    pagination(index, r.Data.Pages);
-                })
-            }
+            SiteSearch(cate, tag, search, index).execute(function (r) {
+                lstBlogControl.Data = r.Data.Items;
+                pagination(index, r.Data.Pages);
+            });
+            window.scrollTo(0, 0);
         }
 
         function blogSearch() {

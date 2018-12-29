@@ -25,7 +25,7 @@
     <div class="page-title">
         <img src="/images/admin/nav.png" /> <h3>分类管理</h3>
     </div>
-    <div class="container bs-docs-container" >
+    <div class="container bs-docs-container">
         <div class="row">
 
             <div style="padding:5px;">
@@ -83,35 +83,29 @@
             List();
         });
 
-        async function OrderBy(id, up, index) {
+        function OrderBy(id, up, index) {
             if (index == 0)
                 return;
-            var result = await AdminCategoryOrder(id, up);
-            if (result.Code == 200) {
+            AdminCategoryOrder(id, up).execute(function () {
                 List();
-            }
-            else {
-                alert(result.Error);
-            }
+            });
         }
 
-        async function Delete(id) {
+        function Delete(id) {
             if (confirm('是否要删除分类?')) {
-                var result = await AdminCategoryDel(id);
-                if (result.Code == 200) {
+                AdminCategoryDel(id).execute(function () {
                     List();
-                }
-                else {
-                    alert(result.Error);
-                }
+                });
             }
         }
 
-        async function List() {
-             bindVue(lstCate, AdminCategoryList());         
+        function List() {
+            AdminCategoryList().execute(function (r) {
+                lstCate.Data = r.Data;
+            });
         }
 
-        async function Add() {
+        function Add() {
             if (!cateCreater.title) {
                 alert("请输入分类名称!");
                 return;
@@ -120,15 +114,11 @@
                 alert("请输入分类描述!");
                 return;
             }
-            var result = await AdminCategoryAdd(cateCreater.title, cateCreater.remark);
-            if (result.Code == 200) {
+            AdminCategoryAdd(cateCreater.title, cateCreater.remark).execute(function (r) {
                 cateCreater.title = '';
                 cateCreater.remark = '';
                 List();
-            }
-            else {
-                alert(result.Error);
-            }
+            });
         }
     </script>
 

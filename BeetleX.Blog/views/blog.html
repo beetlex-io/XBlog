@@ -38,10 +38,10 @@
                             <h4>
                                 <span v-if="Data.SourceUrl" class="label label-warning">转</span>
 
-                                <span v-else class="label label-success">原</span> <a>{{Data.Title}}</a>
+                                <span v-else class="label label-success">原</span> <a href="#">{{Data.Title}}</a>
                             </h4>
                             <div style="margin-bottom:4px;">
-                                <a class="btn btn-xs"><img src="/images/date.png" />{{Data.CreateTime}}</a>
+                                <span class="btn btn-xs"><img src="/images/date.png" />{{Data.CreateTime}}</span>
                                 <a :href="['/cate/'+Data.CategoryID+'.html']"><img src="/images/category.png" /> {{Data.Category}}</a>
                                 <img src="/images/tags.png" />
                                 <a v-for="tag in Data.Tags" :href="['/tag/'+encodeURIComponent(tag)+'.html']" :class="[getColor()]">{{tag}}</a>
@@ -56,7 +56,7 @@
                         <b> 原文:<a :href="Data.SourceUrl" target="_blank">{{Data.SourceUrl}}</a></b>
                     </div>
                 </div>
-            
+
                 <hr />
                 <h5>评论列表</h5>
                 <div id="lstComments">
@@ -82,7 +82,7 @@
                         <div class="col-sm-offset-0 col-sm-11" style="margin-bottom:6px;">
                             <button type="button" onclick="$('#txtEditor').show(); $('#txtView').hide()" class="btn  btn-default btn-sm">编辑</button>
                             <button type="button" onclick="$('#txtEditor').hide(); $('#txtView').show()" class="btn  btn-default btn-sm">预览</button>
-                            <a class="btn  btn-default btn-sm" href="https://postimages.org/" target="_blank">图片上传</a>
+                            <a class="btn  btn-default btn-sm" href="http://www.freeimagehosting.net/" target="_blank">图片上传</a>
                             支持Markdown内容
                         </div>
 
@@ -162,13 +162,14 @@
                     }
                 }
             });
-            bindVue(viewBlog, SiteGetBlog(_url.fileNameWithOutExt, true), function (c, r) {
-                c.Data = r.Data;
+            SiteGetBlog(_url.fileNameWithOutExt, true).execute(function (r) {
+                viewBlog.Data = r.Data;
                 if (document.title)
                     document.title = document.title + r.Data.Title;
                 else
                     document.title = r.Data.Title;
             });
+
             $.goup({
                 trigger: 100,
                 bottomOffset: 50,
@@ -186,7 +187,7 @@
             }, 500);
         });
 
-        async function saveComment() {
+        function saveComment() {
             if (!addCommant.nickName) {
                 alert('请输入你的昵称!');
                 return;
@@ -199,19 +200,18 @@
                 alert('评论内容不能超过1000个字符!');
                 return;
             }
-            var result = await SiteCommint(_url.fileNameWithOutExt, addCommant.nickName, addCommant.content, true);
-            if (result.Code == 200) {
+            SiteCommint(_url.fileNameWithOutExt, addCommant.nickName, addCommant.content, true).execute(function (r) {
                 loadComments();
                 addCommant.content = '';
                 addCommant.nickName = '';
-            }
-            else {
-                alert(result.Error);
-            }
+            });
         }
 
         function loadComments() {
-            bindVue(lstComments, SiteListCommint(_url.fileNameWithOutExt));
+            SiteListCommint(_url.fileNameWithOutExt).execute(function (r) {
+                lstComments.Data = r.Data;
+            });
+
         }
 
         function blogSearch() {

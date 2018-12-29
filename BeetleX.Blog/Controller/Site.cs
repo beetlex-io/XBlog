@@ -18,11 +18,12 @@ namespace BeetleX.Blog.Controller
         [ActionCacehFilter("get_title_menus")]
         public object GetTitleAndMenu()
         {
+            string Version = typeof(Site).Assembly.GetName().Version.ToString();
             string Title = DBHelper.Default.Setting.Title.Value;
             var items = new Expression().List<Category>(Category.orderBy.Asc);
             var Menus = from a in items
                         select new { a.ID, a.Name };
-            return new { Title, Menus };
+            return new { Title, Menus, Version };
         }
         [HttpCacheFilter]
         [ActionCacehFilter("get_top_tags")]
@@ -125,6 +126,7 @@ namespace BeetleX.Blog.Controller
 
         private HttpApiServer mServer;
 
+        [SkipFilter(typeof(ESExceptionFilter))]
         public object GetServerInfo()
         {
             if (mServer.ServerCounter != null)

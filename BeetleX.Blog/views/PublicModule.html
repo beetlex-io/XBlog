@@ -8,12 +8,19 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" style="color:white;" href="/"> <img src="/images/home_icon.png" style="float:left;margin-top:-6px;padding-right:6px;" />{{Data.Title}}</a>
+                <a class="navbar-brand" style="color:white;" href="/" :title="['v:'+Data.Version]">
+                    <img src="/images/home_icon.png" style="float:left;margin-top:-6px;padding-right:6px;" />{{Data.Title}}
+
+                </a>
+                
             </div>
             <div class="navbar-collapse collapse" role="navigation">
                 <ul class="nav navbar-nav">
 
-                    <li v-for="item in Data.Menus"><a :href="['/cate/'+item.ID+'.html']">{{item.Name}}</a></li>
+                    <li v-for="item in Data.Menus">
+                        <a :href="['/cate/'+item.ID+'.html']">{{item.Name}}</a>
+
+                    </li>
 
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -33,13 +40,13 @@
         <script>
             var siteHeader;
             siteHeader = new Vue({ el: '#siteHeader', data: { Data: { Title: '', Menus: [] } } });
-            bindVue(siteHeader, SiteGetTitleAndMenu(), function (c, r) {
-                c.Data = r.Data;
+            SiteGetTitleAndMenu().execute(function (r) {
+                siteHeader.Data = r.Data;
                 if (document.title)
                     document.title = r.Data.Title + "  " + document.title;
                 else
                     document.title = r.Data.Title;
-            });
+            })
         </script>
     </template>
     <template id="topBlog">
@@ -49,7 +56,9 @@
         <script>
             var lstNewBlog;
             lstTopBlog = new Vue({ el: "#lstTopBlog", data: { Data: [] } });
-            bindVue(lstTopBlog, SiteTopBlog());
+            SiteTopBlog().execute(function (r) {
+                lstTopBlog.Data = r.Data;
+            });
         </script>
     </template>
     <template id="topComment">
@@ -70,7 +79,10 @@
         <script>
             var lstTopComment;
             lstTopComment = new Vue({ el: "#lstTopComment", data: { Data: [] } });
-            bindVue(lstTopComment, SiteTopComment());
+            SiteTopComment().execute(function (r) {
+                lstTopComment.Data = r.Data;
+            });
+
         </script>
     </template>
 
@@ -81,7 +93,10 @@
         <script>
             var lstNewBlog;
             lstNewBlog = new Vue({ el: "#lstNewBlog", data: { Data: [] } });
-            bindVue(lstNewBlog, SiteNewBlog());
+            SiteNewBlog().execute(function (r) {
+                lstNewBlog.Data = r.Data;
+            })
+
         </script>
     </template>
     <template id="about">
@@ -100,7 +115,10 @@
                     }
                 }
             });
-            bindVue(aboutInfo, SiteGetAbout());
+            SiteGetAbout().execute(function (r) {
+                aboutInfo.Data = r.Data;
+            });
+
         </script>
     </template>
     <template id="tags">
@@ -112,13 +130,10 @@
         </div>
         <script>
             var lstTags;
-
             lstTags = new Vue({ el: '#lstTags', data: { Data: [] } });
-            async function loadTags() {
-                var result = await SiteGetTags();
-                lstTags.Data = result.Data;
-            }
-            loadTags();
+            SiteGetTags().execute(function (r) {
+                lstTags.Data = r.Data;
+            });
         </script>
     </template>
     <template id="header">
@@ -188,17 +203,18 @@
                         Data: {}
                     }
                 });
-                async function GetServerInfo() {
-                    var result = await SiteGetServerInfo();
-                    serverInfoControl.Data = result.Data;
-                    cpu.push(result.Data.Cpu);
-                    cpuMonitor.draw();
-                    request.push(result.Data.RequestPer);
-                    requestMonitor.draw();
+                function GetServerInfo() {
+                    SiteGetServerInfo().execute(function (result) {
+                        serverInfoControl.Data = result.Data;
+                        cpu.push(result.Data.Cpu);
+                        cpuMonitor.draw();
+                        request.push(result.Data.RequestPer);
+                        requestMonitor.draw();
 
-                    netInput.push(result.Data.ReceiveBytesPer);
-                    netOutput.push(result.Data.SendBytesPer);
-                    networkMonitor.draw();
+                        netInput.push(result.Data.ReceiveBytesPer);
+                        netOutput.push(result.Data.SendBytesPer);
+                        networkMonitor.draw();
+                    });
                 }
 
                 cpuMonitor = new Monitor('cpuCanavas');
@@ -218,7 +234,6 @@
                 netOutput = networkMonitor.create();
                 netOutput.maxValue = 10;
                 netOutput.label = "Network Output(MB)";
-
                 GetServerInfo();
                 setInterval(function () { GetServerInfo(); }, 1000);
             </script>

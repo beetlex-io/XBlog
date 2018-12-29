@@ -94,7 +94,10 @@
         $(document).ready(function () {
             lstDoc = new Vue({ el: '#lstDoc', data: { Data: [], Categories: [], Category: 0 } });
             search(0);
-            bindVue(lstDoc, AdminCategoryList(), function (c, r) { c.Categories = r.Data });
+            AdminCategoryList().execute(function (r) {
+
+                lstDoc.Categories = r.Data;
+            });
         });
 
         function getSelectItems() {
@@ -106,15 +109,11 @@
             return items;
         }
 
-        async function syncData() {
+        function syncData() {
             if (confirm('是否同步所有文章到索引中?')) {
-                var result = await AdminBlogAllSyncToES();
-                if (result.Code == 200) {
+                AdminBlogAllSyncToES().execute(function (r) {
                     alert('数据同步成功！');
-                }
-                else {
-                    alert(result.Error);
-                }
+                });
             }
         }
 
@@ -124,17 +123,13 @@
         }
 
 
-        async function deleteDoc() {
+        function deleteDoc() {
             var items = getSelectItems();
             if (items.length > 0) {
                 if (confirm('是否要删除选择的文章?')) {
-                    var result = await AdminBlogDelete(items);
-                    if (result.Code == 200) {
+                    AdminBlogDelete(items).execute(function (r) {
                         search(0);
-                    }
-                    else {
-                        alert(result.Error);
-                    }
+                    });
                 }
             }
             else {
@@ -146,13 +141,11 @@
             search(index);
         }
 
-        async function search(index) {
-            bindVue(lstDoc, AdminBlogList(lstDoc.Category, index),
-                function (c, r) {
-                    c.Data = r.Data.Items;
-                    pagination(index, r.Data.Pages);
-                });
-
+        function search(index) {
+            AdminBlogList(lstDoc.Category, index).execute(function (r) {
+                lstDoc.Data = r.Data.Items;
+                pagination(index, r.Data.Pages);
+            });
         }
     </script>
 </body>

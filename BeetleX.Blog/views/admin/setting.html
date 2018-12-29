@@ -111,65 +111,53 @@
             });
             GetSetting();
         });
-        async function reCreateKey() {
+        function reCreateKey() {
             if (confirm('重新生成JWT Key，是否继续？')) {
-                var result = await AdminSettingReCreateJWT();
-                if (result.Code == 200) {
+                AdminSettingReCreateJWT().execute(function (r) {
                     alert("已经生成成功!");
                     GetSetting();
-                }
-                else {
-                    alert(result.Error);
-                }
+                });
             }
         }
-        async function recreateIndex() {
+        function recreateIndex() {
             if (confirm('是否要重建索，是否继续？')) {
-                var result = await AdminSettingReCreateIndex();
-                if (result.Code == 200) {
+                AdminSettingReCreateIndex().execute(function (r) {
                     alert("重建索引完成，请在文章管理里重新同步数据!");
-
-                }
-                else {
-                    alert(result.Error);
-                }
+                });
             }
         }
-        async function testES() {
+        function testES() {
             var word = $('#txtWord').val();
             if (!word) {
                 alert('输入测试分语的内容');
                 return;
             }
-            var result = await AdminSettingESTest(word);
-            if (result.Code == 200) {
+            AdminSettingESTest(word).execute(function (r) {
                 alert(result.Data);
-            }
-            else {
-                alert(result.Error);
-            }
+            });
         }
-        async function changePWD() {
+        function changePWD() {
             if (!settingEditor.Password.NEW || (settingEditor.Password.NEW != settingEditor.Password.RNEW)) {
                 alert("新密码为空或不一致,请重新输入!")
                 return;
             }
-            var code = await execute_api(AdminSettingChangePwd(settingEditor.Password.NEW,
-                settingEditor.Password.RNEW));
-            if (code == 200) {
-                alert("密码修改成功!");
-            }
+            AdminSettingChangePwd(settingEditor.Password.NEW,
+                settingEditor.Password.RNEW).execute(function (r) {
+                    alert("密码修改成功!");
+                });
         }
-        async function save() {
-            var code = await execute_api(AdminSettingUpdateSetting(settingEditor.Data.Title,
-                settingEditor.Data.ESHost, settingEditor.Data.About));
-            if (code == 200) {
-                alert("信息设置成功!")
-                GetSetting();
-            }
+        function save() {
+            AdminSettingUpdateSetting(settingEditor.Data.Title,
+                settingEditor.Data.ESHost, settingEditor.Data.About).execute(function (r) {
+                    alert("信息设置成功!")
+                    GetSetting();
+                });
         }
-        async function GetSetting() {
-            bindVue(settingEditor, AdminSettingGetSetting());
+        function GetSetting() {
+            AdminSettingGetSetting().execute(function (r) {
+                settingEditor.Data = r.Data;
+            });
+
         }
     </script>
 </body>

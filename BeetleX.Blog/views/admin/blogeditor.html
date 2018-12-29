@@ -38,7 +38,7 @@
                     <div class="col-sm-offset-1 col-sm-10" style="margin-bottom:6px;">
                         <button type="button" onclick="$('#txtEditor').show(); $('#txtView').hide()" class="btn  btn-default btn-sm">编辑</button>
                         <button type="button" onclick="$('#txtEditor').hide(); $('#txtView').show()" class="btn  btn-default btn-sm">预览</button>
-                        <a class="btn  btn-default btn-sm" href="https://postimages.org/" target="_blank">图片上传</a>
+                        <a class="btn  btn-default btn-sm" href="http://www.freeimagehosting.net/" target="_blank">图片上传</a>
                         支持Markdown内容
                     </div>
 
@@ -120,35 +120,31 @@
                 }
 
             });
-            id = getUrlVars()["id"];
+            id = _url.queryString["id"];
             if (!id)
                 id = 0;
             else
                 LoadBlog();
             ListCategories();
         });
-        async function LoadBlog() {
-            var result = await AdminBlogGet(id);
-            if (result.Code == 200) {
+        function LoadBlog() {
+            AdminBlogGet(id).execute(function (result) {
                 blogEditor.content = result.Data.Content;
                 blogEditor.category = result.Data.CategoryID;
                 blogEditor.sourceUrl = result.Data.SourceUrl;
                 blogEditor.tags = result.Data.Tags;
                 blogEditor.top = result.Data.Top;
                 blogEditor.title = result.Data.Title;
-            }
-            else {
-                alert(result.Error);
-            }
+            });
         }
-        async function ListCategories() {
-            var result = await AdminCategoryList();
-            blogEditor.categories = result.Data;
+        function ListCategories() {
+            AdminCategoryList().execute(function (result) {
+                blogEditor.categories = result.Data;
+            });
+
         }
 
-
-
-        async function Save() {
+        function Save() {
             var summary = $('#txtView').text();
             if (summary.length > 150)
                 summary = summary.substring(0, 150);
@@ -161,24 +157,10 @@
                 alert('请输入文章内容！');
                 return;
             }
-            var result = await AdminBlogModify(id, blogEditor.title, blogEditor.top, blogEditor.tags,
-                blogEditor.category, blogEditor.sourceUrl, blogEditor.content, summary);
-            if (result.Code == 200) {
-                window.location.href = 'index.html';
-            }
-            else {
-                alert(result.Error);
-            }
-        }
-        function getUrlVars() {
-            var vars = [], hash;
-            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-            for (var i = 0; i < hashes.length; i++) {
-                hash = hashes[i].split('=');
-                vars.push(hash[0]);
-                vars[hash[0]] = hash[1];
-            }
-            return vars;
+            AdminBlogModify(id, blogEditor.title, blogEditor.top, blogEditor.tags,
+                blogEditor.category, blogEditor.sourceUrl, blogEditor.content, summary).execute(function (r) {
+                    window.location.href = 'index.html';
+                });
         }
     </script>
 </body>

@@ -2,6 +2,7 @@
 var __receive;
 var __connect;
 var __disconnect;
+var api_errors = new Object();
 function FastHttpApiWebSocket() {
     if (window.location.protocol == "https:") {
         this.wsUri = "wss://" + window.location.host;
@@ -86,20 +87,20 @@ function FastHttpApi(url, params, http, post) {
 
 FastHttpApi.prototype.sync = function () {
     var _this = this;
-    return new Promise(resolve => {
-        _this.execute(function (result) {
-            resolve(result);
-        });
-    });
+    //return new Promise(resolve => {
+    //    _this.execute(function (result) {
+    //        resolve(result);
+    //    });
+    //});
+    return this;
 }
 FastHttpApi.prototype.httpRequest = function () {
     this.http = true;
-    return this.sync();
+    //return this.sync();
+    return this;
 }
 
-FastHttpApi.prototype.execute = function (callback, http) {
-    if (http == true)
-        this.http = true;
+FastHttpApi.prototype.execute = function (callback, all) {
     var id = ++__id;
     if (__id > 1024)
         __id = 0;
@@ -108,6 +109,24 @@ FastHttpApi.prototype.execute = function (callback, http) {
     var index;
     this.params['_requestid'] = id;
     var _this = this;
+    var backevent = function (result) {
+        if (all) {
+            if (callback) {
+                callback(result);
+            }
+        }
+        else {
+            if (result.Code == 200) {
+                if (callback) {
+                    callback(result);
+                }
+            }
+            else {
+                var item = api_errors[result.Code.toString()];
+                item(result);
+            }
+        }
+    }
     if (this.http || __websocket.status == false) {
         if (this.post) {
             httpurl = this.url;
@@ -117,10 +136,7 @@ FastHttpApi.prototype.execute = function (callback, http) {
                 url: httpurl,
                 data: JSON.stringify(_this.params),
                 dataType: "json",
-                success: function (result) {
-                    if (callback)
-                        callback(result);
-                }
+                success: backevent
             });
         }
         else {
@@ -139,14 +155,11 @@ FastHttpApi.prototype.execute = function (callback, http) {
                     index++;
                 }
             }
-            $.get(httpurl, function (result) {
-                if (callback)
-                    callback(result);
-            });
+            $.get(httpurl, backevent);
         }
     }
     else {
-        __websocket.send(this.url, this.params, callback);
+        __websocket.send(this.url, this.params, backevent);
     }
 
 }
@@ -168,36 +181,11 @@ function api_receive(callback) {
     __receive = callback;
 }
 
-async function execute_api(promise, callback) {
-    var result = await promise;
-    if (result.Code != 200) {
-        if (callback)
-            callback(result);
-        else
-            alert(result.Error);
-    }
-    return result.Code;
+api_errors['403'] = function (result) {
+    window.location.href = result.Data;
 }
-
-async function bindVue(control, promise, binder) {
-    var result = await promise;
-    if (result.Code == 200) {
-        if (binder) {
-            binder(control, result);
-        }
-        else {
-            control.Data = result.Data;
-        }
-    }
-    else {
-        if (result.Code == 403) {
-            window.location.href = result.Data;
-        }
-        else {
-            alert(result.Error + "(" + result.Code + ")");
-        }
-    }
-    return result;
+api_errors['500'] = function (result) {
+    alert(result.Error);
 }
 
 var __websocket = new FastHttpApiWebSocket();
@@ -232,18 +220,18 @@ function pagination(index, pages) {
     $('#pagination').empty();
     if (pages < 10) {
         for (i = 0; i < pages; i++) {
-            var item = '<li><a  class="btn-xs" page="' + i + '" href="javascript:void(0)" onclick="pageChange(' + i + ')">' + (i + 1) + '</a></li>'
+            var item = '<li><a  class="btn-xs" page="' + i + '" href="javascript:void(0)" onclick="pageChange(' + i + ')">' + (i + 1) + '</a></li>';
             $('#pagination').append(item);
         }
     }
     else {
-        var item = '<li><a  class="btn-xs" page="' + 0 + '" href="javascript:void(0)" onclick="pageChange(0)">1</a></li>'
+        var item = '<li><a  class="btn-xs" page="' + 0 + '" href="javascript:void(0)" onclick="pageChange(0)">1</a></li>';
         $('#pagination').append(item);
 
 
         for (i = index - 5; i < index + 1; i++) {
             if (i > 0 && i < pages - 1) {
-                var item = '<li><a  class="btn-xs" page="' + i + '" href="javascript:void(0)" onclick="pageChange(' + i + ')">' + (i + 1) + '</a></li>'
+                var item = '<li><a  class="btn-xs" page="' + i + '" href="javascript:void(0)" onclick="pageChange(' + i + ')">' + (i + 1) + '</a></li>';
                 $('#pagination').append(item);
             }
         }
@@ -251,18 +239,18 @@ function pagination(index, pages) {
 
         for (i = index + 1; i < index + 5; i++) {
             if (i < (pages - 1)) {
-                var item = '<li><a  class="btn-xs" page="' + i + '" href="javascript:void(0)" onclick="pageChange(' + i + ')">' + (i + 1) + '</a></li>'
+                var item = '<li><a  class="btn-xs" page="' + i + '" href="javascript:void(0)" onclick="pageChange(' + i + ')">' + (i + 1) + '</a></li>';
                 $('#pagination').append(item);
             }
         }
         if (pages > 1) {
-            var item = '<li><a class="btn-xs" page="' + (pages - 1) + '" href="javascript:void(0)" onclick="pageChange(' + (pages - 1) + ')">' + (pages) + '</a></li>'
+            var item = '<li><a class="btn-xs" page="' + (pages - 1) + '" href="javascript:void(0)" onclick="pageChange(' + (pages - 1) + ')">' + (pages) + '</a></li>';
             $('#pagination').append(item);
         }
     }
     $('a').each(function () {
         if ($(this).attr('page') == index) {
-            $(this).html('<span class="badge">' + (index + 1) + '</span>')
+            $(this).html('<span class="badge">' + (index + 1) + '</span>');
         }
     })
 }

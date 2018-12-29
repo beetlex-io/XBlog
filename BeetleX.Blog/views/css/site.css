@@ -99,7 +99,7 @@
     }
 
 a {
-    color: #484646;
+    color: #0472c6;
 }
 
     a:hover {
@@ -160,6 +160,16 @@ a {
     margin-bottom: 6px;
 }
 
+#aboutInfo ul {
+    padding-left: 20px;
+}
+
+#aboutInfo h1, #aboutInfo h2, #aboutInfo h3, #aboutInfo h4, #aboutInfo h5, #aboutInfo h6, #aboutInfo h7 {
+    margin: 0px;
+    padding: 0px;
+    margin-bottom: 6px;
+}
+
 .blog-Body h1 {
     font-size: 16pt;
 }
@@ -215,6 +225,16 @@ pre {
 code {
     line-height: 20px;
 }
+.Version {
+    margin-top: 34px;
+    margin-left:-60px;
+    position: fixed;
+    float:right;
+    font-size: 8pt;
+    padding-left: 4px;
+    color: #ffffff;
+}
+    
 
 
 

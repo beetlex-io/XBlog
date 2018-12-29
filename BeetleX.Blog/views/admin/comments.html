@@ -80,18 +80,13 @@
 
         });
 
-        async function delComment() {
+        function delComment() {
             var items = getSelectItems();
             if (items.length > 0) {
                 if (confirm('是否要删除评论?')) {
-                    var result = await AdminCommentDel(items);
-                    if (result.Code == 200) {
+                    AdminCommentDel(items).execute(function (r) {
                         pageChange(0);
-                    }
-                    else {
-                        alert(result.Error);
-                    }
-
+                    });
                 }
             }
             else {
@@ -99,8 +94,8 @@
             }
         }
         function pageChange(index) {
-            bindVue(lstComments, AdminCommentList(index), function (c, r) {
-                c.Data = r.Data.Items;
+            AdminCommentList(index).execute(function (r) {
+                lstComments.Data = r.Data.Items;
                 pagination(index, r.Data.Pages);
             });
         }

@@ -54,16 +54,17 @@
 
     </div>
     <script>
-        async function login() {
+        function login() {
             var name = $('#name').val();
             var pwd = md5($('#pwd').val());
-            var result = await AdminSettingLogin(name, pwd, true);
-            if (result.Data == true) {
-                window.location.href = '/admin/';
-            }
-            else {
-                alert('用户名密码不正确！');
-            }
+            AdminSettingLogin(name, pwd, true).execute(function (result) {
+                if (result.Data == true) {
+                    window.location.href = '/admin/';
+                }
+                else {
+                    alert('用户名或密码不正确!');
+                }
+            });
         }
     </script>
 </body>

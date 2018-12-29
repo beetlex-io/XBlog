@@ -19,41 +19,41 @@ function readFileHandler(file, blockSize) {
 readFileHandler.prototype.completed = function () {
     return this.pages == this.index;
 };
-readFileHandler.prototype.read = function () {
+readFileHandler.prototype.read = function (callback) {
     var _this = this;
-  
-    return new Promise(resolve => {
-        var length = _this.size - this.readBytes;
-        if (length > _this.blockSize)
-            length = _this.blockSize;
-        if (!_this.reader)
-            _this.reader = new FileReader();
-        var result;
-        _this.reader.onload = function (evt) {
-            if (evt.target.readyState == FileReader.DONE) {
-                var str = _this.toBase64(evt.target.result);
-                result = { Eof: _this.completed(), Data: str, Name: _this.name };
-                resolve(result);
-            }
-            else {
-                result = { errCode: 500, name: "load file error!" };
-                resolve(result);
-            }
-        };
-        _this.reader.onerror = function (evt) {
-            result = { errCode: evt.target.error.errCode, name: evt.target.error.name };
-            resolve(result);
-        };
+    var length = _this.size - this.readBytes;
+    if (length > _this.blockSize)
+        length = _this.blockSize;
+    if (!_this.reader)
+        _this.reader = new FileReader();
+    var result;
+    _this.reader.onload = function (evt) {
+        if (evt.target.readyState == FileReader.DONE) {
+            var str = _this.toBase64(evt.target.result);
+            result = { Eof: _this.completed(), Data: str, Name: _this.name };
+            if (callback)
+                callback(result);
+        }
+        else {
+            result = { errCode: 500, name: "load file error!" };
+            if (callback)
+                callback(result);
+        }
+    };
+    _this.reader.onerror = function (evt) {
+        result = { errCode: evt.target.error.errCode, name: evt.target.error.name };
+        if (callback)
+            callback(result);
+    };
+    var start = _this.index * _this.blockSize;
+    var end = start + length;
+    _this.index++;
+    _this.readBytes += length;
+    var blob = _this.file.slice(start, end);
+    _this.reader.readAsArrayBuffer(blob);
+    var p = this.index / this.pages * 100;
+    this.percent = parseInt(p);
 
-        var start = _this.index * _this.blockSize;
-        var end = start + length;
-        _this.index++;
-        _this.readBytes += length;
-        var blob = _this.file.slice(start, end);
-        _this.reader.readAsArrayBuffer(blob);
-        var p = this.index / this.pages * 100;
-        this.percent = parseInt(p);
-    });
 };
 readFileHandler.prototype.toBase64 = function (buffer) {
     var binary = '';

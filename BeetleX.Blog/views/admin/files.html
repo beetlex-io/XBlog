@@ -106,33 +106,33 @@
             }, 2000);
         }
 
-        async function uploadFile(rf) {
+        function uploadFile(rf) {
             if (rf.completed() != true) {
-                // console.log(rf.name + " updating:" + rf.index);
-                var data = await rf.read();
-                if (!data.errCode) {
-                    var result = await FileManagerUploadFile(root, data);
-                    // console.log(rf.name + " uploadstate " + result.Code);
-
-                    if (result.Code != 200) {
-                        alert(result.Error);
-                        removeUpload(rf);
-                        return;
+                rf.read(function (data) {
+                    if (!data.errCode) {
+                        FileManagerUploadFile(root, data).execute(function (result) {
+                            if (result.Code != 200) {
+                                alert(result.Error);
+                                removeUpload(rf);
+                                return;
+                            }
+                            else {
+                                if (data.Eof == true) {
+                                    removeUpload(rf);
+                                    listResource();
+                                }
+                                else {
+                                    uploadFile(rf);
+                                }
+                            }
+                        }, true);
                     }
                     else {
-                        if (data.Eof == true) {
-                            removeUpload(rf);
-                            listResource();
-                        }
-                        else {
-                            uploadFile(rf);
-                        }
+                        removeUpload(rf);
+                        alert(data.name);
                     }
-                }
-                else {
-                    removeUpload(rf);
-                    alert(data.name);
-                }
+                });
+
             }
             else {
                 removeUpload(rf);
@@ -147,35 +147,29 @@
             listResource();
         }
 
-        async function DeleteResource(name, isfile) {
+        function DeleteResource(name, isfile) {
             if (confirm('是否要删除文件（' + name + '）')) {
-                var result = await FileManagerDeleteResource(root, name, isfile);
-                if (result.Code == 403) {
-                    window.location.href = result.Data;
-                }
-                else {
+                FileManagerDeleteResource(root, name, isfile).execute(function (r) {
                     listResource();
-                }
+                });
             }
         }
 
-        async function CreateFolder() {
+        function CreateFolder() {
             if (!$('#folderName').val()) {
                 alert("请输入文件夹名称!")
                 return;
             }
-            var result = await FileManagerCreateFolder(root, $('#folderName').val());
-            if (result.Code == 403) {
-                window.location.href = result.Data;
-            }
-            else {
+            FileManagerCreateFolder(root, $('#folderName').val()).execute(function (r) {
                 $('#folderName').val('');
                 listResource();
-            }
+            });
         }
 
-        async function listResource() {
-            bindVue(lstDocControl, FileManagerList(root));
+        function listResource() {
+            FileManagerList(root).execute(function (r) {
+                lstDocControl.Data = r.Data;
+            });
         }
 
     </script>

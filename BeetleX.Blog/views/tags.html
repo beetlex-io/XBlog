@@ -38,13 +38,10 @@
                 </div>
                 <script>
                     var lstAllTags;
-
                     lstAllTags = new Vue({ el: '#lstAllTags', data: { Data: [] } });
-                    async function loadTags() {
-                        var result = await SiteGetAllTags();
-                        lstAllTags.Data = result.Data;
-                    }
-                    loadTags();
+                    SiteGetAllTags().execute(function (r) {
+                        lstAllTags.Data = r.Data;
+                    });
                 </script>
             </div>
             <div class="col-md-4 leftPack">

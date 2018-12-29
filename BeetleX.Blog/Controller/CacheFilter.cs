@@ -41,6 +41,8 @@ namespace BeetleX.Blog.Controller
 
         public override bool Executing(ActionContext context)
         {
+            if (context.HttpContext.Server.Options.Debug)
+                return true;
             object result = CacheHelper.Get(Key);
             if (result != null)
             {

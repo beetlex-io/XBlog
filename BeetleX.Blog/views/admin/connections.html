@@ -84,20 +84,13 @@
             return items;
         }
 
-        async function disconnect() {
+        function disconnect() {
             var items = getSelectItems();
             if (items.length > 0) {
-                if (confirm('是否要删除连接?')) {
-                    var sessions = getSelectItems();
-                    if (sessions.length > 0) {
-                        var result = await AdminSettingCloseSession(sessions);
-                        if (result.Code == 200) {
-                            searchConn(0);
-                        }
-                        else {
-                            alert(result.Error);
-                        }
-                    }
+                if (confirm('是否要关闭选择的连接?')) {
+                    AdminSettingCloseSession(items).execute(function (r) {
+                        searchConn(0);
+                    });
                 }
             }
             else {
@@ -114,9 +107,9 @@
             searchConn(index);
         }
 
-        async function searchConn(index) {
-            bindVue(lstConnectionControl, AdminSettingListConn(index), function (c, r) {
-                c.Data = r.Data.Items;
+        function searchConn(index) {
+            AdminSettingListConn(index).execute(function (r) {
+                lstConnectionControl.Data = r.Data.Items;
                 pagination(index, r.Data.Pages);
             });
         }

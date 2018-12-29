@@ -155,19 +155,18 @@
         });
 
 
-        async function GetStatus() {
-            bindVue(statusControl, AdminSettingGetServerInfo(),
-                function (c, r) {
-                    statusControl.Data = r.Data;
-                    cpu.push(r.Data.Cpu);
-                    cpuMonitor.draw();
-                    request.push(r.Data.RequestPer);
-                    requestMonitor.draw();
+        function GetStatus() {
+            AdminSettingGetServerInfo().execute(function (r) {
+                statusControl.Data = r.Data;
+                cpu.push(r.Data.Cpu);
+                cpuMonitor.draw();
+                request.push(r.Data.RequestPer);
+                requestMonitor.draw();
 
-                    netInput.push(r.Data.ReceiveBytesPer);
-                    netOutput.push(r.Data.SendBytesPer);
-                    networkMonitor.draw();
-                });
+                netInput.push(r.Data.ReceiveBytesPer);
+                netOutput.push(r.Data.SendBytesPer);
+                networkMonitor.draw();
+            });
         }
     </script>
 </body>
