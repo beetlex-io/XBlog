@@ -18,6 +18,41 @@ namespace BeetleX.Blog.Controller
             return new object();
         }
 
+        public object GetFileAndTCloudToken(string name)
+        {
+            string ext = System.IO.Path.GetExtension(name);
+            if (string.IsNullOrEmpty(DBHelper.Default.Setting.TCloudID.Value))
+            {
+                return new ActionResult(500, "没有配置腾讯云SecretId相关信息!");
+            }
+            string filename = name;//Guid.NewGuid().ToString("N") + ext;
+            filename = "/" + (Math.Abs(filename.GetHashCode()) % 10).ToString("00") + "/" + filename;
+            TCloudCosObject cloudCosObject = new TCloudCosObject(
+                DBHelper.Default.Setting.TCloudID.Value,
+                DBHelper.Default.Setting.TCloudKey.Value,
+                DBHelper.Default.Setting.TCloudHost.Value
+                );
+            string Token = cloudCosObject.GetPutToken(filename);
+            string Url = cloudCosObject.GetPutUrl(filename);
+            return new { Token, Url };
+            ;
+        }
+
+        public void SaveTCloudInfo(string id, string key, string host)
+        {
+            DBHelper.Default.Setting.SaveTCould(id, key, host);
+        }
+
+        public object GetTCloudInfo()
+        {
+            return new
+            {
+                SecretId = DBHelper.Default.Setting.TCloudID.Value,
+                SecretKey = DBHelper.Default.Setting.TCloudKey.Value,
+                Host = DBHelper.Default.Setting.TCloudHost.Value
+            };
+        }
+
         public string ESTest(string word)
         {
             return string.Join(',', ES.ESHelper.Blog.Analyze(word, Elasticsearch.AnalyzerType.ik_smart));

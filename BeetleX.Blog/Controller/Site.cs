@@ -16,6 +16,7 @@ namespace BeetleX.Blog.Controller
     {
         [HttpCacheFilter(60 * 30)]
         [ActionCacehFilter("get_title_menus")]
+        [SkipFilter(typeof(ESExceptionFilter))]
         public object GetTitleAndMenu()
         {
             string Version = typeof(Site).Assembly.GetName().Version.ToString();
@@ -96,7 +97,7 @@ namespace BeetleX.Blog.Controller
         }
 
         private const string COMMINT_TOKEN = "COMMINT_TOKEN";
-
+        [HttpCacheFilter]
         public object GetBlog(long id, HttpResponse response)
         {
             DBModules.Blog blog = DBContext.Load<DBModules.Blog>(id);
@@ -125,7 +126,6 @@ namespace BeetleX.Blog.Controller
         }
 
         private HttpApiServer mServer;
-
         [SkipFilter(typeof(ESExceptionFilter))]
         public object GetServerInfo()
         {
@@ -144,8 +144,15 @@ namespace BeetleX.Blog.Controller
             if (!string.IsNullOrEmpty(query))
             {
                 var ws = ESHelper.Blog.Analyze(query, Elasticsearch.AnalyzerType.ik_smart);
-                esQuery.Bool.Must.Terms("Content", ws);
-                esQuery.Bool.Should.MatchPhrase("Title", query);
+                foreach (var k in ws)
+                {
+                    if (k.Length >= 2 || k.ToLower() == "c")
+                    {
+                        esQuery.Bool.Must.Term("Content", k);
+                    }
+                }
+                //  esQuery.Bool.ShouldMatch(1);
+                esQuery.Bool.Should.Terms("Title", ws);
 
             }
             else if (!string.IsNullOrEmpty(tag))

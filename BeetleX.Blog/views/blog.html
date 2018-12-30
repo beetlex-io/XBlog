@@ -124,6 +124,9 @@
 
     </div>
     <script>
+        marked.setOptions({
+            targetBlank: true
+        });
         var viewBlog;
         var lstComments;
         var addCommant;
@@ -185,6 +188,7 @@
                     $('pre code').css("color", '#000');
                 });
             }, 500);
+           
         });
 
         function saveComment() {

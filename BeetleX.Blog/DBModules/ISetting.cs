@@ -27,6 +27,12 @@ namespace BeetleX.Blog.DBModules
 
         public const string JWTKEY = "JWT_KEY";
 
+        public const string TCLOUD_ID = "TCLOUD_ID";
+
+        public const string TCLOUD_KEY = "TCLOUD_KEY";
+
+        public const string TCLOUD_HOST = "TCLOUD_HOST";
+
         public Option PassWord { get; private set; }
 
         public Option Title { get; private set; }
@@ -37,11 +43,42 @@ namespace BeetleX.Blog.DBModules
 
         public Option ElasticSearch { get; private set; }
 
+        public Option TCloudID { get; private set; }
+
+        public Option TCloudKey { get; private set; }
+
+        public Option TCloudHost { get; private set; }
+
         public Option JwtKey { get; private set; }
 
         public void Init()
         {
             Option option;
+
+            if ((Option.name == TCLOUD_ID).Count<Option>() == 0)
+            {
+                option = new Option();
+                option.Name = TCLOUD_ID;
+                option.Value = "";
+                option.Save();
+            }
+
+            if ((Option.name == TCLOUD_KEY).Count<Option>() == 0)
+            {
+                option = new Option();
+                option.Name = TCLOUD_KEY;
+                option.Value = "";
+                option.Save();
+            }
+
+            if ((Option.name == TCLOUD_HOST).Count<Option>() == 0)
+            {
+                option = new Option();
+                option.Name = TCLOUD_HOST;
+                option.Value = "";
+                option.Save();
+            }
+
             if ((Option.name == USERNAME).Count<Option>() == 0)
             {
                 option = new Option();
@@ -101,7 +138,20 @@ namespace BeetleX.Blog.DBModules
             ElasticSearch = (Option.name == ES_HOST).ListFirst<Option>();
             About = (Option.name == ABOUT).ListFirst<Option>();
             JwtKey = (Option.name == JWTKEY).ListFirst<Option>();
+            TCloudID = (Option.name == TCLOUD_ID).ListFirst<Option>();
+            TCloudKey = (Option.name == TCLOUD_KEY).ListFirst<Option>();
+            TCloudHost = (Option.name == TCLOUD_HOST).ListFirst<Option>();
 
+        }
+
+        public void SaveTCould(string id, string key, string host)
+        {
+            TCloudID.Value = id;
+            TCloudID.Save();
+            TCloudKey.Value = key;
+            TCloudKey.Save();
+            TCloudHost.Value = host;
+            TCloudHost.Save();
         }
 
         public void ReCreateJWT()

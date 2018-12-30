@@ -25,7 +25,7 @@
     </div>
     <div class="container bs-docs-container">
         <div class="row" id="settingEditor">
-            <form>
+            <form class="form-group-sm">
                 <div class="form-group">
                     <label for="exampleInputEmail1">网站标题</label>
                     <input type="text" v-model:value="Data.Title" class="form-control">
@@ -34,12 +34,12 @@
                 <div v-if="Data.ESStatus" class="form-group has-success has-feedback">
                     <label for="exampleInputPassword1">ElasticSearch服务地址</label>
                     <input type="text" v-model:value="Data.ESHost" class="form-control" placeholder="http://localhost:9200">
-                    <div class="form-group">
-                        <label for="exampleInputPassword1">  分词测试</label>
-                        <input type="text" id="txtWord" class="form-control" placeholder="输入分词内容">
-                        <button type="button" onclick="testES()" class="btn btn-default">测试分词</button>
-                        <button type="button" onclick="recreateIndex()" class="btn btn-default">重建索引</button>
-                    </div>
+
+
+                    <input type="text" id="txtWord" class="form-control" placeholder="输入分词内容" style="margin-bottom:4px;margin-top:4px;">
+                    <button type="button" onclick="testES()" class="btn btn-default btn-sm">测试分词</button>
+                    <button type="button" onclick="recreateIndex()" class="btn btn-default btn-sm">重建索引</button>
+
 
                 </div>
                 <div v-else class="form-group has-error has-feedback">
@@ -50,26 +50,43 @@
 
 
                 <div class="form-group">
-                    <label for="exampleInputFile">关于(Markdown)</label>
-                    <textarea :value="Data.About" @input="update" class="form-control" rows="10"></textarea>
-                    <div v-html="compiledMarkdown" style="width:100%"></div>
+                    <label>关于(Markdown)</label>
+                    <a href="javascript:void(0)" onclick="$('#txtAboutHtml').hide(); $('#txtAbout').show()">编辑</a>
+                    <a href="javascript:void(0)" onclick="$('#txtAboutHtml').show(); $('#txtAbout').hide()">预览</a>
+                    <textarea id="txtAbout" :value="Data.About" @input="update" class="form-control" rows="10"></textarea>
+                    <div id="txtAboutHtml" class="form-control" v-html="compiledMarkdown" style="height:200px;overflow-y: auto; overflow-x:hidden; width:100%;display:none;"></div>
                 </div>
-                <button type="button" onclick="save()" class="btn btn-default">保存</button>
+                <button type="button" onclick="save()" class="btn btn-default btn-sm">保存</button>
 
 
             </form>
             <hr />
-            <form>
+            <form class="form-group-sm">
 
                 <div class="form-group">
-                    <label>JWT Key</label>
+                    <label class="form-group">JSON Web Tokey Key</label>
                     <input type="text" :value="Data.KEY" class="form-control" readonly>
                 </div>
-                <button type="button" onclick="reCreateKey()" class="btn btn-default">重新生成</button>
+                <button type="button" onclick="reCreateKey()" class="btn btn-default btn-sm">重新生成</button>
             </form>
             <hr />
-
-            <form class="form-inline">
+            <form class="form-group-sm">
+                <div class="form-group">
+                    <label>腾讯云SecretId</label>
+                    <input type="text" v-model:value="TCould.SecretId" class="form-control" placeholder="SecretId">
+                </div>
+                <div class="form-group">
+                    <label>腾讯云SecretKey</label>
+                    <input type="text" v-model:value="TCould.SecretKey" class="form-control" placeholder="SecretKey">
+                </div>
+                <div class="form-group">
+                    <label>存储桶地址</label>
+                    <input type="text" v-model:value="TCould.Host" class="form-control" placeholder="https://*.cos.ap-guangzhou.myqcloud.com">
+                </div>
+                <button type="button" onclick="saveTCould()" class="btn btn-default btn-sm">修改</button>
+            </form>
+            <hr />
+            <form class="form-group-sm">
                 <div class="form-group">
                     <label>新密码</label>
                     <input type="password" v-model:value="Password.NEW" class="form-control" placeholder="新密码">
@@ -78,7 +95,7 @@
                     <label>确认密码</label>
                     <input type="password" v-model:value="Password.RNEW" class="form-control" placeholder="确认密码">
                 </div>
-                <button type="button" onclick="changePWD()" class="btn btn-default">修改密码</button>
+                <button type="button" onclick="changePWD()" class="btn btn-default btn-sm">修改密码</button>
             </form>
 
 
@@ -95,7 +112,8 @@
                 el: '#settingEditor',
                 data: {
                     Data: { Title: "", ESHost: "", About: "" },
-                    Password: { NEW: "", RNEW: "" }
+                    Password: { NEW: "", RNEW: "" },
+                    TCould: { SecretId: "", SecretKey: "", Host: "" }
 
                 },
                 computed: {
@@ -109,10 +127,26 @@
                     }, 300)
                 }
             });
+            AdminSettingGetTCloudInfo().execute(function (r) {
+                settingEditor.TCould = r.Data;
+            });
             GetSetting();
         });
+
+        function saveTCould() {
+            if (confirm('是否要保存腾讯云配置信息?')) {
+                AdminSettingSaveTCloudInfo(
+                    settingEditor.TCould.SecretId,
+                    settingEditor.TCould.SecretKey,
+                    settingEditor.TCould.Host).execute(function (r) {
+                        alert("设置已保存!");
+                        GetSetting();
+                    });
+            }
+        }
+
         function reCreateKey() {
-            if (confirm('重新生成JWT Key，是否继续？')) {
+            if (confirm('重新生成JSON Web Tokey Key，是否继续？')) {
                 AdminSettingReCreateJWT().execute(function (r) {
                     alert("已经生成成功!");
                     GetSetting();

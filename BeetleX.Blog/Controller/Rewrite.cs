@@ -25,6 +25,13 @@ namespace BeetleX.Blog.Controller
                         e.Response.Header.Add(HeaderTypeFactory.CACHE_CONTROL, "public, max-age=60000");
                     }
                 }
+                if (e.Request.Ext == "html")
+                {
+                    if (e.Request.Url.IndexOf("blogeditor.html") >= 0)
+                    {
+                        e.Response.Header.Add("Access-Control-Allow-Origin", "*");
+                    }
+                }
             };
         }
     }

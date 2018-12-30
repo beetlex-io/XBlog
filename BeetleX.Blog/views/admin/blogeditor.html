@@ -13,6 +13,7 @@
     <script src="/js/FastHttpApi.js"></script>
     <script src="/js/admin/AdminBlog.js"></script>
     <script src="/js/admin/AdminCategory.js"></script>
+    <script src="/js/admin/AdminSetting.js"></script>
     <script src="/js/marked.js"></script>
     <script src="/js/lodash.js"></script>
     <title>BeetleX Blog Admin</title>
@@ -36,16 +37,23 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-1 col-sm-10" style="margin-bottom:6px;">
-                        <button type="button" onclick="$('#txtEditor').show(); $('#txtView').hide()" class="btn  btn-default btn-sm">编辑</button>
-                        <button type="button" onclick="$('#txtEditor').hide(); $('#txtView').show()" class="btn  btn-default btn-sm">预览</button>
+
                         <a class="btn  btn-default btn-sm" href="http://www.freeimagehosting.net/" target="_blank">图片上传</a>
-                        支持Markdown内容
+                        <button type="button" onclick="$('#upimage').trigger('click');" class="btn  btn-default btn-sm">腾讯云图片</button>
+                        <button type="button" onclick="$('#upfile').trigger('click');" class="btn  btn-default btn-sm">腾讯云文件</button>
+                        <button type="button" onclick="insertCode()" class="btn  btn-default btn-sm">代码</button>
+                        <input id="upimage" type="file" style="display:none" />
+                        <input id="upfile" type="file" style="display:none" />
+                        <label>文章内容(Markdown)</label>
+                        <a href="javascript:void(0)" onclick="$('#txtEditor').show(); $('#txtView').hide()" class="">编辑</a>
+                        <a href="javascript:void(0)" onclick="$('#txtEditor').hide(); $('#txtView').show()" class="">预览</a>
+                        <div id="imgLoading" style="display:none;">
+                            <span><img src="/images/ajax-loader.gif" />文件上传中...</span>
+                        </div>
+
                     </div>
-
-
-
                     <div id="txtEditor" class="col-sm-offset-1 col-sm-10">
-                        <textarea :value="content" @input="update" rows="25" style="width:100%"></textarea>
+                        <textarea id="txtContent" :value="content" @input="update" rows="25" style="width:100%"></textarea>
                     </div>
                     <div id="txtView" style="display:none;height:500px;overflow-y: auto; overflow-x:hidden;" class="col-sm-offset-1 col-sm-10" v-html="compiledMarkdown">
 
@@ -118,7 +126,6 @@
                         this.content = e.target.value
                     }, 300)
                 }
-
             });
             id = _url.queryString["id"];
             if (!id)
@@ -126,7 +133,145 @@
             else
                 LoadBlog();
             ListCategories();
+            bindUploadFile();
         });
+
+
+        function ResizeImage(file) {
+            var filename = file.name;
+            AdminSettingGetFileAndTCloudToken(filename).execute(function (r) {
+                var token = r.Data.Token;
+                var url = r.Data.Url;
+                var img = document.createElement("img");
+                img.onload = function () {
+                    var canvas = document.createElement("canvas");
+                    var MAX_WIDTH = 600;
+                    var MAX_HEIGHT = 480;
+                    var width = img.width;
+                    var height = img.height;
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, width, height);
+                    var dataUrl = canvas.toDataURL('image/jpeg', 0.96);
+                    var byteString = atob(dataUrl.split(',')[1]);
+                    var ab = new ArrayBuffer(byteString.length);
+                    var ia = new Uint8Array(ab);
+                    for (var i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: ab,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", token);
+                            $('#imgLoading').show();
+                        },
+                        success: function (result) {
+                            var str = $('#txtContent').val();
+                            str += "\r\n\r\n";
+                            str += "![](" + url + ")";
+                            str += "\r\n\r\n";
+                            $('#txtContent').val(str);
+                            $('#txtView').html(marked(str, { sanitize: true }));
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            if (textStatus != 'success')
+                                alert("Error:" + jqXHR.responseText);
+                            $('#imgLoading').hide();
+                        }
+                    });
+
+                }
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function insertCode() {
+            var str = $('#txtContent').val();
+            str += "```\r\n";
+            str += "代码\r\n";
+            str += "```\r\n";
+            $('#txtContent').val(str);
+            $('#txtView').html(marked(str, { sanitize: true }));
+        }
+
+        function bindUploadFile() {
+            $('#upimage').change(function (evt) {
+                if (evt.target.files && evt.target.files.length > 0) {
+                    var file = evt.target.files[0];
+                    var name = file.name.toLowerCase();
+                    if (name.indexOf('.jpg') || name.indexOf('.png')) {
+                        ResizeImage(file);
+                    }
+                    else {
+                        alert('请选择jpg或png图片!');
+                    }
+
+                }
+            });
+
+
+            $('#upfile').change(function (evt) {
+                if (evt.target.files && evt.target.files.length > 0) {
+                    var file = evt.target.files[0];
+                    var filename = file.name;
+                    AdminSettingGetFileAndTCloudToken(filename).execute(function (r) {
+                        var token = r.Data.Token;
+                        var url = r.Data.Url;
+                        var reader = new FileReader();
+                        reader.onload = function (evt) {
+                            if (evt.target.readyState == FileReader.DONE) {
+                                var buffer = reader.result;
+                                $.ajax({
+                                    url: url,
+                                    type: 'PUT',
+                                    data: buffer,
+                                    contentType: false,
+                                    processData: false,
+                                    beforeSend: function (xhr) {
+                                        xhr.setRequestHeader("Authorization", token);
+                                        $('#imgLoading').show();
+                                    },
+                                    success: function (result) {
+                                        var str = $('#txtContent').val();
+                                        str += "[" + filename + "](" + encodeURI(url) + ")";
+                                        $('#txtContent').val(str);
+                                        $('#txtView').html(marked(str, { sanitize: true }));
+                                    },
+                                    complete: function (jqXHR, textStatus) {
+                                        if (textStatus != 'success')
+                                            alert("Error:" + jqXHR.responseText);
+                                        $('#imgLoading').hide();
+                                    }
+                                });
+                            }
+                        };
+                        var blob = file.slice(0, file.size);
+                        reader.readAsArrayBuffer(blob);
+                    });
+                }
+            });
+        }
+
         function LoadBlog() {
             AdminBlogGet(id).execute(function (result) {
                 blogEditor.content = result.Data.Content;

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>0.5.6</Version>
+    <Version>0.5.8.0</Version>
     <Authors>henryfan</Authors>
     <Company>ikende.com</Company>
     <Copyright>Copyright © ikende.com 2018 email:henryfan@msn.com</Copyright>
@@ -51,6 +51,7 @@
     <None Remove="views\images\admin\tag.png" />
     <None Remove="views\images\admin\talk.png" />
     <None Remove="views\images\admin\up.png" />
+    <None Remove="views\images\ajax-loader.gif" />
     <None Remove="views\images\category.png" />
     <None Remove="views\images\date.png" />
     <None Remove="views\images\home_icon.png" />
@@ -137,6 +138,7 @@
     <EmbeddedResource Include="views\images\admin\tag.png" />
     <EmbeddedResource Include="views\images\admin\talk.png" />
     <EmbeddedResource Include="views\images\admin\up.png" />
+    <EmbeddedResource Include="views\images\ajax-loader.gif" />
     <EmbeddedResource Include="views\images\category.png" />
     <EmbeddedResource Include="views\images\date.png" />
     <EmbeddedResource Include="views\images\home_icon.png" />

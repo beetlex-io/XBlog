@@ -21,6 +21,51 @@ function AdminSettingGetServerInfoAsync(useHttp)
 {
     return api(AdminSettingGetServerInfoUrl,{},useHttp);
 }
+var AdminSettingGetFileAndTCloudTokenUrl='/admin/setting/GetFileAndTCloudToken';
+/**
+* 'var result= await AdminSettingGetFileAndTCloudToken(params);'
+**/
+function AdminSettingGetFileAndTCloudToken(name,useHttp)
+{
+    return api(AdminSettingGetFileAndTCloudTokenUrl,{name:name},useHttp).sync();
+}
+/**
+* 'AdminSettingGetFileAndTCloudTokenAsync(params).execute(function(result){},useHttp);'
+**/
+function AdminSettingGetFileAndTCloudTokenAsync(name,useHttp)
+{
+    return api(AdminSettingGetFileAndTCloudTokenUrl,{name:name},useHttp);
+}
+var AdminSettingSaveTCloudInfoUrl='/admin/setting/SaveTCloudInfo';
+/**
+* 'var result= await AdminSettingSaveTCloudInfo(params);'
+**/
+function AdminSettingSaveTCloudInfo(id,key,host,useHttp)
+{
+    return api(AdminSettingSaveTCloudInfoUrl,{id:id,key:key,host:host},useHttp).sync();
+}
+/**
+* 'AdminSettingSaveTCloudInfoAsync(params).execute(function(result){},useHttp);'
+**/
+function AdminSettingSaveTCloudInfoAsync(id,key,host,useHttp)
+{
+    return api(AdminSettingSaveTCloudInfoUrl,{id:id,key:key,host:host},useHttp);
+}
+var AdminSettingGetTCloudInfoUrl='/admin/setting/GetTCloudInfo';
+/**
+* 'var result= await AdminSettingGetTCloudInfo(params);'
+**/
+function AdminSettingGetTCloudInfo(useHttp)
+{
+    return api(AdminSettingGetTCloudInfoUrl,{},useHttp).sync();
+}
+/**
+* 'AdminSettingGetTCloudInfoAsync(params).execute(function(result){},useHttp);'
+**/
+function AdminSettingGetTCloudInfoAsync(useHttp)
+{
+    return api(AdminSettingGetTCloudInfoUrl,{},useHttp);
+}
 var AdminSettingESTestUrl='/admin/setting/ESTest';
 /**
 * 'var result= await AdminSettingESTest(params);'

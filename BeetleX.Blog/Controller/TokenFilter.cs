@@ -12,7 +12,7 @@ namespace BeetleX.Blog.Controller
             var user = JWTHelper.Default.GetUserInfo(context.HttpContext.Request);
             if (user == null)
             {
-                var result = new ActionResult(403, "没限操作资源");
+                var result = new ActionResult(403, "没权限操作资源");
                 result.Data = "/admin/login.html";
                 context.Result = result;
                 return false;
@@ -35,7 +35,7 @@ namespace BeetleX.Blog.Controller
                 string name = context.HttpContext.Data["_userRole"];
                 if (name != "admin")
                 {
-                    var result = new ActionResult(403, "没限操作资源");
+                    var result = new ActionResult(403, "没权限操作资源");
                     result.Data = "/admin/login.html";
                     context.Result = result;
                     return false;
