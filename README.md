@@ -1,6 +1,9 @@
 ## XBlog
 基于 [Beetlex.FastHttpApi](https://github.com/IKende/FastHttpApi) 框架构建的个人博客系统
 
+## 0.5.8.0
+增加腾讯云存储的支持，可以在编辑文章中使用腾讯云免费存储的50G空间来存储图片和附件
+
 ## 技术要点
 - 基于`dotnet core`平台，可以运行在windows和linux系统上
 - 完全基于[`BeetleX.FastHttpAp`](https://github.com/IKende/FastHttpApi)框架开发
