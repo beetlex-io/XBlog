@@ -6,6 +6,8 @@
 
 [XBlog0.5.8.0.zip](https://github.com/IKende/XBlog/blob/master/Publish/XBlog0.5.8.0.zip)
 
+[配置腾讯云存储](https://www.ikende.com/blog/95.html)
+
 ## 技术要点
 - 基于`dotnet core`平台，可以运行在windows和linux系统上
 - 完全基于[`BeetleX.FastHttpAp`](https://github.com/IKende/FastHttpApi)框架开发
