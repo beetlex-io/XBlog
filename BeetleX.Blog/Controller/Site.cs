@@ -54,14 +54,14 @@ namespace BeetleX.Blog.Controller
         [ActionCacehFilter("get_top_blog")]
         public object TopBlog()
         {
-            var items = ESHelper.Blog.Query<ESBlog>(q => q.OrderBy("CreateTime", OrderType.desc).Term("Top", "true"), 0, 10);
+            var items = ESHelper.Blog.Query<ESBlog>(q => q.OrderBy("CreateTime", OrderType.desc).Term("Top", "true"), 0, 15);
             return from a in items select new { a.ID, a.Title };
         }
         [HttpCacheFilter]
         [ActionCacehFilter("get_new_blog")]
         public object NewBlog()
         {
-            var item = ESHelper.Blog.Query<ESBlog>(q => q.OrderBy("CreateTime", OrderType.desc), 0, 10);
+            var item = ESHelper.Blog.Query<ESBlog>(q => q.OrderBy("CreateTime", OrderType.desc), 0, 15);
             return from a in item select new { a.ID, a.Title };
         }
 
@@ -77,8 +77,35 @@ namespace BeetleX.Blog.Controller
             return from a in commints select new { a.NickName, a.Content, CreateTime = a.CreateTime.ToString() };
         }
 
+        public object GetPhoto(int id)
+        {
+            var items = (PhotoItem.photoID == id).List<PhotoItem>();
+            return from a in items select new { a.LargeUrl };
+        }
+
+        [HttpCacheFilter]
+        public object ListPhoto(int index)
+        {
+            int size = 40;
+            Expression expression = new Expression();
+            int Count = expression.Count<Photo>();
+            int Pages = Count / size;
+            if (Count % size > 0)
+                Pages++;
+            var items = expression.List<Photo>(new Region(index, size), Photo.createTime.Desc);
+            var Items = from a in items
+                        select new
+                        {
+                            a.ID,
+                            a.Title,
+                            CreateTime = a.CreateTime.ToShortDateString(),
+                            SmallUrl = Blog.Units.GetImageUrl(a.SmallUrl)
+                        };
+            return new { Count, Pages, Items };
+        }
+
         [Post]
-        public object Commint(long id, string nickName, string content, HttpRequest request)
+        public object Commint(long id, string nickName, string content, HttpRequest request, HttpResponse response)
         {
             string token = request.Cookies[COMMINT_TOKEN];
             if (token != Units.MD5Encrypt(id.ToString() + DateTime.Now.Date))
@@ -87,6 +114,7 @@ namespace BeetleX.Blog.Controller
             }
             else
             {
+                response.SetCookie("_nickName", nickName, DateTime.Now.AddYears(1));
                 DBModules.Comment comment = new Comment();
                 comment.BlogID = id;
                 comment.NickName = nickName;
@@ -98,7 +126,7 @@ namespace BeetleX.Blog.Controller
 
         private const string COMMINT_TOKEN = "COMMINT_TOKEN";
         [HttpCacheFilter]
-        public object GetBlog(long id, HttpResponse response)
+        public object GetBlog(long id, HttpResponse response, HttpRequest request)
         {
             DBModules.Blog blog = DBContext.Load<DBModules.Blog>(id);
             if (blog != null)
@@ -115,6 +143,7 @@ namespace BeetleX.Blog.Controller
                     Tags = string.IsNullOrEmpty(blog.Tags) ? new string[0] : blog.Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries),
                     blog.SourceUrl,
                     CreateTime = blog.CreateTime.ToString(),
+                    NickName = request.Cookies["_nickName"]
                 };
             }
             return new object();
@@ -173,6 +202,8 @@ namespace BeetleX.Blog.Controller
             int Pages = count / size;
             if (count % size > 0)
                 Pages++;
+            if (Pages > 100)
+                Pages = 100;
             var Items = from a in esItems
                         select new
                         {
@@ -186,7 +217,7 @@ namespace BeetleX.Blog.Controller
                             CreateTime = a.CreateTime.ToString()
 
                         };
-            return new { Pages, Items };
+            return new { Pages, Items, Count = count };
         }
 
 

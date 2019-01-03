@@ -1,0 +1,310 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminSetting.js"></script>
+    <script src="/js/admin/AdminPhoto.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3 id="photoTitle">个人相册</h3>
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+            <div style="padding:5px;">
+                <div class="form-inline form-group-sm" id="cateCreater">
+                    <input onclick="selectAll(this)" type="checkbox" />全选
+                    <button type="button" onclick="$('#webImg').trigger('click');" class="btn  btn-default btn-sm">上传</button>
+                    <button type="button" onclick="del();" class="btn  btn-default btn-sm">删除</button>
+                    <a href="photos.html" class="btn  btn-default btn-sm">返回</a>
+                    <div id="imgLoading" style="display:none;">
+                        <span id="txtLoading"><img src="/images/ajax-loader.gif" />文件上传中...</span>
+                    </div>
+                    <input id="webImg" type="file" style="display:none" multiple />
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row" id="lstPhoto">
+
+            <div class="thumbnail photo-penal" v-for="item in Data">
+                <div class="photo-title form-inline">
+                    <input v-bind:id="item.ID" type="checkbox" style="margin-top:6px;margin-right:4px;" />
+                    <a href="javascript:void(0)" v-on:click="setDefault(item.ID)" style="float:right;" class="btn  btn-default btn-sm">设置封面</a>
+                </div>
+                <div class="photo-item">
+                    <img photo="img" @load="onImgLoad(item.ID)" :id="['img_'+item.ID]" :src="item.SmallUrl" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+    <script>
+        var lstPhoto;
+        var itemID;
+        var photoID;
+
+        $(document).ready(function () {
+            lstPhoto = new Vue({
+                el: '#lstPhoto', data: {
+                    Data: []
+                }
+
+            });
+            bindUploadFile();
+            getPhoto();
+        });
+
+
+        function setDefault(id) {
+            AdminPhotoSetDefault(id).execute(function (r) {
+                alert('已设置成为封面图片!');
+            });
+        }
+
+        function uploadSmallImg(file, width, height, itemid, photoid, files, index) {
+            LoadResizeImageData(file, width, height, function (filename, buffer) {
+                var url = '/admin/photo/UploadImage?file=' + encodeURI(filename) + '&id=' + itemid + '&photoid=' + photoid + '&large=false';
+                console.log('upload small img' + url);
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: buffer,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function (xhr) {
+                        $('#imgLoading').show();
+                    },
+                    complete: function (jqXHR, textStatus) {
+                        if (textStatus != 'success')
+                            alert("Error:" + jqXHR.responseText);
+                        $('#imgLoading').hide();
+                        uploadLargeImg(file, itemid, photoid, files, index);
+                    }
+                });
+
+            });
+        }
+
+        function uploadLargeImg(file, itemid, photoid, files, index) {
+            LoadResizeImageData(file, 800, 600, function (filename, buffer) {
+
+                var url = '/admin/photo/UploadImage?file=' + encodeURI(filename) + '&id=' + itemid + '&photoid=' + photoid + '&large=true';
+                console.log('upload Large img' + url);
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: buffer,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function (xhr) {
+                        $('#imgLoading').show();
+                    },
+                    complete: function (jqXHR, textStatus) {
+                        if (textStatus != 'success')
+                            alert("Error:" + jqXHR.responseText);
+                        $('#imgLoading').hide();
+                        uploadFile(files, index + 1);
+                    }
+                });
+
+            });
+        }
+
+        function uploadFile(files, index) {
+            console.log("upload index:" + index);
+            if (index >= files.length) {
+                console.log("return ,no item!")
+                getPhoto();
+                return;
+            }
+            var file = files[index];
+            AdminPhotoGetImageID().execute(function (r) {
+                var itemID = r.Data;
+                var photoID = _url.queryString["id"];
+                var img = document.createElement("img");
+                img.onload = function () {
+                    var imgw = (img.width);
+                    var imgh = img.height;
+                    if (imgw > imgh) {
+                        var p = 220 / imgh;
+                        imgh = 220;
+                        imgw = imgw * p;
+                    }
+                    else {
+                        var p = 165 / imgw;
+                        imgw = 165;
+                        imgh = imgh * p;
+                    }
+                    console.log("small size:" + imgw + '/' + imgh);
+                    uploadSmallImg(file, imgw, imgh, itemID, photoID, files, index);
+                };
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function bindUploadFile() {
+
+            $('#webImg').change(function (evt) {
+                console.log("select files");
+                if (evt.target.files && evt.target.files.length > 0) {
+                    var files = new Array();
+                    for (var i = 0; i < evt.target.files.length; i++) {
+                        var file = evt.target.files[i];
+                        var name = file.name.toLowerCase();
+                        if (name.indexOf('.jpg') || name.indexOf('.png')) {
+                            files.push(file);
+                        }
+                        else {
+                            alert(name + '无效，请选择jpg或png图片!');
+                        }
+                    }
+                    if (files.length > 0) {
+                        uploadFile(files, 0);
+                        console.log("upload images " + files.length);
+                    }
+                }
+            });
+        }
+
+
+        function getPhoto() {
+            var id = _url.queryString["id"];
+            AdminPhotoGet(id).execute(function (r) {
+                lstPhoto.Data = r.Data.Items;
+                $('#photoTitle').html('相册 (' + r.Data.Title + ')');
+            });
+        }
+
+        function onImgLoad(id) {
+
+            var el = $('#img_' + id);
+            var width = el.width();
+            var height = el.height();
+
+            if (width > 165) {
+                el.css("margin-left", (165 - width) / 2 + "px")
+
+            }
+            if (height > 220) {
+                el.css("margin-top", (220 - height) / 2 + "px")
+            }
+
+        }
+        function getSelectItems() {
+            var items = new Array();
+            $("input[type='checkbox']").each(function () {
+                if ($(this).prop("checked") == true && $(this).prop("id"))
+                    items.push($(this).attr('id'));
+            });
+            return items;
+        }
+
+        function LoadResizeImageData(file, max_width, max_height, callback) {
+            var filename = file.name;
+            var img = document.createElement("img");
+            img.onload = function () {
+                var canvas = document.createElement("canvas");
+                var MAX_WIDTH = max_width;
+                var MAX_HEIGHT = max_height;
+                var width = img.width;
+                var height = img.height;
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                var dataUrl = canvas.toDataURL('image/jpeg', 0.98);
+                var byteString = atob(dataUrl.split(',')[1]);
+                var ab = new ArrayBuffer(byteString.length);
+                var ia = new Uint8Array(ab);
+                for (var i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                callback(filename, ab);
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function del() {
+            var items = getSelectItems();
+            if (items.length == 0) {
+                alert('请选择删除的相片');
+                return;
+            }
+            if (confirm('是否要删除已选择的相片?')) {
+                AdminPhotoDelItem(items).execute(function (r) {
+                    getPhoto();
+                });
+            }
+        }
+
+        function selectAll(e) {
+            var checkedOfAll = $(e).prop("checked");
+            $("input[type='checkbox']").prop("checked", checkedOfAll);
+        }
+
+        function pageChange(index) {
+            AdminPhotoList(index).execute(function (r) {
+                lstPhoto.Data = r.Data.Items;
+                pagination(index, r.Data.Pages);
+
+
+            });
+        }
+        function Add() {
+            var title = $('#txtTitle').val();
+            if (!title) {
+                alert('请输入相册名称');
+                return;
+            }
+            AdminPhotoAdd(title).execute(function (r) {
+                $('#txtTitle').val('');
+                pageChange(0);
+            });
+        }
+    </script>
+</body>
+
+</html>

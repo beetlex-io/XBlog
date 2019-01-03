@@ -6,21 +6,20 @@
     <link href="/css/bootstrap.css" rel="stylesheet" />
     <link href="/css/bootstrap-theme.css" rel="stylesheet" />
     <link href="/css/site.css" rel="stylesheet" />
+
     <script src="/js/jquery.js"></script>
-    <script src="/js/ModuleLoader.js"></script>
-    <script src="/js/bootstrap.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <link rel="stylesheet"
-          href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.13.1/build/styles/default.min.css">
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.13.1/build/highlight.min.js"></script>
-    <script src="/js/highlight_pack.js"></script>
-    <script src="/js/FastHttpApi.js"></script>
-    <script src="/js/Site.js"></script>
     <script src="/js/jquery_goup.js"></script>
-    <script src="/js/Monitor.js"></script>
+    <script src="/js/highlight_min.js"></script>
+    <script src="/js/highlight_pack.js"></script>
+    <script src="/js/vue.js"></script>
+    <script src="/js/vue-lazyload.js"></script>
     <script src="/js/marked.js"></script>
     <script src="/js/lodash.js"></script>
-
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/Site.js"></script>
+    <script src="/js/Monitor.js"></script>
     <title></title>
 </head>
 <body>
@@ -33,14 +32,20 @@
     <div class="container bs-docs-container">
         <div class="row">
             <div class="col-md-8" role="main">
+               
                 <div id="lstBlog">
+                    <p id="searchText" style="display:none;padding-top:10px;margin-bottom:0px;"></p>
                     <div class="blog-item" v-for="item in Data">
                         <div class="panel-body">
-                            <h4>
-                                <span v-if="item.SourceUrl" class="label label-warning">转</span>
+                            <div class="form-inline blog-title">
+                                <span v-if="item.SourceUrl" class="label label-warning blog-type">转</span>
 
-                                <span v-else class="label label-success">原</span> <a v-bind:href="['/blog/'+item.ID+'.html']">{{item.Title}}</a>
-                            </h4>
+                                <span v-else class="label label-success blog-type">原</span>
+
+                                <h4>
+                                    <a v-bind:href="['/blog/'+item.ID+'.html']">{{item.Title}}</a>
+                                </h4>
+                            </div>
                             <div style="margin-bottom:6px;">
                                 <span class="btn btn-xs"><img src="/images/date.png" />{{item.CreateTime}}</span>
                                 <a :href="['/cate/'+item.CategoryID+'.html']"><img src="/images/category.png" /> {{item.Category}}</a>
@@ -83,6 +88,11 @@
         var btnStyles = ["btn btn-default btn-xs", "btn btn-primary btn-xs",
             "btn btn-success btn-xs", "btn btn-default btn-xs", "btn btn-info btn-xs", "btn btn-warning btn-xs", "btn btn-default btn-xs", "btn btn-danger btn-xs"];
         var colorIndex = 0;
+
+        var cate = null;
+        var searchText = null;
+        var tag = null;
+
         function getColor() {
             colorIndex++;
             return btnStyles[colorIndex % btnStyles.length];
@@ -91,7 +101,6 @@
         var lstBlogControl;
         $(document).ready(function () {
             lstBlogControl = new Vue({ el: '#lstBlog', data: { Data: [] } });
-            search(0);
             setTimeout(function () {
                 $('pre code').each(function (i, block) {
                     hljs.highlightBlock(block);
@@ -106,19 +115,14 @@
                 title: '',
                 titleAsText: true
             });
-        });
-
-        function pageChange(index) {
-            search(index);
-        }
-
-        function search(index) {
-            var cate = null;
-            var search = null;
-            var tag = null;
+            var index = _url.queryString["page"];
+            if (!index)
+                index = 0;
+            else
+                index = parseInt(index);
             if (_url.fileNameWithOutExt) {
                 if (_url.folder.indexOf("search") >= 0) {
-                    search = _url.fileNameWithOutExt;
+                    searchText = _url.fileNameWithOutExt;
                 }
                 else if (_url.folder.indexOf("tag") >= 0) {
                     tag = _url.fileNameWithOutExt;
@@ -129,9 +133,25 @@
                 else {
                 }
             }
-            SiteSearch(cate, tag, search, index).execute(function (r) {
+            search(index);
+        });
+
+
+        function search(index) {
+            SiteSearch(cate, tag, searchText, index).execute(function (r) {
+                if (searchText) {
+                    $('#searchText').show();
+                    if (r.Data.Count > 0)
+                        $('#searchText').html('<span class="btn btn-success "style="border:none">搜索符合"' + searchText + '"的有:' + r.Data.Count + '条数据</span>');
+                    else
+                        $('#searchText').html('<span class="btn btn-warning "style="border:none">没找到符合"' + searchText + '"相关数据</span>');
+                }
+                else {
+                    $('#searchText').hide();
+                }
+
                 lstBlogControl.Data = r.Data.Items;
-                pagination(index, r.Data.Pages);
+                pagination_blog(index, r.Data.Pages);
             });
             window.scrollTo(0, 0);
         }
@@ -142,6 +162,50 @@
             if (text) {
                 window.location.href = "/search/" + encodeURIComponent(text) + ".html";
             }
+        }
+
+        function pagination_blog(index, pages) {
+            if (pages <= 1)
+                return;
+            $('#pagination').empty();
+            if (pages < 10) {
+                for (i = 0; i < pages; i++) {
+                    var item = '<li><a  class="btn-xs" page="' + i + '" href="?page=' + i + '">' + (i + 1) + '</a></li>';
+                    $('#pagination').append(item);
+                }
+            }
+            else {
+                var item = '<li><a  class="btn-xs" page="' + 0 + '" href="javascript:void(0)">1</a></li>';
+                $('#pagination').append(item);
+
+
+                for (i = index - 5; i < index + 1; i++) {
+                    if (i > 0 && i < pages - 1) {
+                        var item = '<li><a  class="btn-xs" page="' + i + '" href="?page=' + i + '">' + (i + 1) + '</a></li>';
+                        $('#pagination').append(item);
+                    }
+                }
+
+
+                for (i = index + 1; i < index + 5; i++) {
+                    if (i < (pages - 1)) {
+                        var item = '<li><a  class="btn-xs" page="' + i + '" href="?page=' + i + '">' + (i + 1) + '</a></li>';
+                        $('#pagination').append(item);
+                    }
+                }
+                if (pages > 1) {
+                    var item = '<li><a class="btn-xs" page="' + (pages - 1) + '" href="?page=' + (pages - 1) + '">' + (pages) + '</a></li>';
+                    $('#pagination').append(item);
+                }
+            }
+            $('a').each(function () {
+                if ($(this).attr('page')) {
+                    $(this).css("margin", "2px")
+                };
+                if ($(this).attr('page') == index) {
+                    $(this).html('<span class="badge">' + (index + 1) + '</span>');
+                }
+            })
         }
     </script>
 </body>

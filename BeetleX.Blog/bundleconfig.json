@@ -1,0 +1,25 @@
+[
+  {
+    "outputFileName": "views/js/bundle.js",
+    "inputFiles": [
+      "views/js/bootstrap.js",
+      "views/js/FastHttpApi.js",
+      "views/js/highlight_pack.js",
+      "views/js/jquery_goup.js",
+      "views/js/lodash.js",
+      "views/js/marked.js",
+      "views/js/md5.js",
+      "views/js/ModuleLoader.js",
+      "views/js/Monitor.js",
+      "views/js/Site.js"
+    ]
+  },
+  {
+    "outputFileName": "views/css/bundle.css",
+    "inputFiles": [
+      "views/css/bootstrap.css",
+      "views/css/bootstrap-theme.css",
+      "views/css/site.css"
+    ]
+  }
+]

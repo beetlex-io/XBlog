@@ -110,6 +110,32 @@ function SiteListCommint(id, useHttp) {
 function SiteListCommintAsync(id, useHttp) {
     return api(SiteListCommintUrl, { id: id }, useHttp);
 }
+var SiteGetPhotoUrl = '/GetPhoto';
+/**
+* 'var result= await SiteGetPhoto(params);'
+**/
+function SiteGetPhoto(id, useHttp) {
+    return api(SiteGetPhotoUrl, { id: id }, useHttp).sync();
+}
+/**
+* 'SiteGetPhotoAsync(params).execute(function(result){},useHttp);'
+**/
+function SiteGetPhotoAsync(id, useHttp) {
+    return api(SiteGetPhotoUrl, { id: id }, useHttp);
+}
+var SiteListPhotoUrl = '/ListPhoto';
+/**
+* 'var result= await SiteListPhoto(params);'
+**/
+function SiteListPhoto(index, useHttp) {
+    return api(SiteListPhotoUrl, { index: index }, useHttp).sync();
+}
+/**
+* 'SiteListPhotoAsync(params).execute(function(result){},useHttp);'
+**/
+function SiteListPhotoAsync(index, useHttp) {
+    return api(SiteListPhotoUrl, { index: index }, useHttp);
+}
 var SiteCommintUrl = '/Commint';
 /**
 * 'var result= await SiteCommint(params);'

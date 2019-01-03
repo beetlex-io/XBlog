@@ -114,14 +114,14 @@ var AdminSettingUpdateSettingUrl = '/admin/setting/UpdateSetting';
 /**
 * 'var result= await AdminSettingUpdateSetting(params);'
 **/
-function AdminSettingUpdateSetting(title, host, about, useHttp) {
-    return api(AdminSettingUpdateSettingUrl, { title: title, host: host, about: about }, useHttp).sync();
+function AdminSettingUpdateSetting(title, host, about, imghost, useHttp) {
+    return api(AdminSettingUpdateSettingUrl, { title: title, host: host, about: about, imghost: imghost }, useHttp).sync();
 }
 /**
 * 'AdminSettingUpdateSettingAsync(params).execute(function(result){},useHttp);'
 **/
-function AdminSettingUpdateSettingAsync(title, host, about, useHttp) {
-    return api(AdminSettingUpdateSettingUrl, { title: title, host: host, about: about }, useHttp);
+function AdminSettingUpdateSettingAsync(title, host, about, imghost, useHttp) {
+    return api(AdminSettingUpdateSettingUrl, { title: title, host: host, about: about, imghost: imghost }, useHttp);
 }
 var AdminSettingReCreateIndexUrl = '/admin/setting/ReCreateIndex';
 /**

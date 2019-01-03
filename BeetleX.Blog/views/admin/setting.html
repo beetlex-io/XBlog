@@ -46,6 +46,7 @@
                     <label for="exampleInputPassword1">ElasticSearch服务地址</label>
                     <input type="text" v-model:value="Data.ESHost" class="form-control" placeholder="http://localhost:9200">
                     {{Data.ESError}}
+                    <button type="button" onclick="recreateIndex()" class="btn btn-default btn-sm">重建索引</button>
                 </div>
 
 
@@ -55,6 +56,10 @@
                     <a href="javascript:void(0)" onclick="$('#txtAboutHtml').show(); $('#txtAbout').hide()">预览</a>
                     <textarea id="txtAbout" :value="Data.About" @input="update" class="form-control" rows="10"></textarea>
                     <div id="txtAboutHtml" class="form-control" v-html="compiledMarkdown" style="height:200px;overflow-y: auto; overflow-x:hidden; width:100%;display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputEmail1">站内图片域名:</label>
+                    <input type="text" v-model:value="Data.ImgHost" class="form-control" placeholder="img1.ikende.com;img2.ikende.com">
                 </div>
                 <button type="button" onclick="save()" class="btn btn-default btn-sm">保存</button>
 
@@ -111,7 +116,7 @@
             settingEditor = new Vue({
                 el: '#settingEditor',
                 data: {
-                    Data: { Title: "", ESHost: "", About: "" },
+                    Data: { Title: "", ESHost: "", About: "", ImgHost: "" },
                     Password: { NEW: "", RNEW: "" },
                     TCould: { SecretId: "", SecretKey: "", Host: "" }
 
@@ -182,7 +187,8 @@
         }
         function save() {
             AdminSettingUpdateSetting(settingEditor.Data.Title,
-                settingEditor.Data.ESHost, settingEditor.Data.About).execute(function (r) {
+                settingEditor.Data.ESHost, settingEditor.Data.About,
+                settingEditor.Data.ImgHost).execute(function (r) {
                     alert("信息设置成功!")
                     GetSetting();
                 });

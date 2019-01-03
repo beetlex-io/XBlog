@@ -25,6 +25,8 @@ namespace BeetleX.Blog.DBModules
 
         public const string ABOUT = "ABOUT";
 
+        public const string IMG_HOST = "IMG_HOST";
+
         public const string JWTKEY = "JWT_KEY";
 
         public const string TCLOUD_ID = "TCLOUD_ID";
@@ -51,9 +53,19 @@ namespace BeetleX.Blog.DBModules
 
         public Option JwtKey { get; private set; }
 
+        public Option ImgHost { get; private set; }
+
         public void Init()
         {
             Option option;
+
+            if ((Option.name == IMG_HOST).Count<Option>() == 0)
+            {
+                option = new Option();
+                option.Name = IMG_HOST;
+                option.Value = "";
+                option.Save();
+            }
 
             if ((Option.name == TCLOUD_ID).Count<Option>() == 0)
             {
@@ -141,6 +153,7 @@ namespace BeetleX.Blog.DBModules
             TCloudID = (Option.name == TCLOUD_ID).ListFirst<Option>();
             TCloudKey = (Option.name == TCLOUD_KEY).ListFirst<Option>();
             TCloudHost = (Option.name == TCLOUD_HOST).ListFirst<Option>();
+            ImgHost = (Option.name == IMG_HOST).ListFirst<Option>();
 
         }
 
@@ -170,6 +183,7 @@ namespace BeetleX.Blog.DBModules
             Title.Save();
             ElasticSearch.Save();
             About.Save();
+            ImgHost.Save();
         }
     }
 }

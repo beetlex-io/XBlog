@@ -130,16 +130,16 @@ var AdminSettingUpdateSettingUrl='/admin/setting/UpdateSetting';
 /**
 * 'var result= await AdminSettingUpdateSetting(params);'
 **/
-function AdminSettingUpdateSetting(title,host,about,useHttp)
+function AdminSettingUpdateSetting(title,host,about,imghost,useHttp)
 {
-    return api(AdminSettingUpdateSettingUrl,{title:title,host:host,about:about},useHttp).sync();
+    return api(AdminSettingUpdateSettingUrl,{title:title,host:host,about:about,imghost:imghost},useHttp).sync();
 }
 /**
 * 'AdminSettingUpdateSettingAsync(params).execute(function(result){},useHttp);'
 **/
-function AdminSettingUpdateSettingAsync(title,host,about,useHttp)
+function AdminSettingUpdateSettingAsync(title,host,about,imghost,useHttp)
 {
-    return api(AdminSettingUpdateSettingUrl,{title:title,host:host,about:about},useHttp);
+    return api(AdminSettingUpdateSettingUrl,{title:title,host:host,about:about,imghost:imghost},useHttp);
 }
 var AdminSettingReCreateIndexUrl='/admin/setting/ReCreateIndex';
 /**
@@ -155,6 +155,21 @@ function AdminSettingReCreateIndex(useHttp)
 function AdminSettingReCreateIndexAsync(useHttp)
 {
     return api(AdminSettingReCreateIndexUrl,{},useHttp);
+}
+var AdminSettingUploadImageUrl='/admin/setting/UploadImage';
+/**
+* 'var result= await AdminSettingUploadImage(params);'
+**/
+function AdminSettingUploadImage(file,useHttp)
+{
+    return api(AdminSettingUploadImageUrl,{file:file},useHttp).sync();
+}
+/**
+* 'AdminSettingUploadImageAsync(params).execute(function(result){},useHttp);'
+**/
+function AdminSettingUploadImageAsync(file,useHttp)
+{
+    return api(AdminSettingUploadImageUrl,{file:file},useHttp);
 }
 var AdminSettingReCreateJWTUrl='/admin/setting/ReCreateJWT';
 /**

@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/site.css" rel="stylesheet" />
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/jquery_goup.js"></script>
+    <script src="/js/highlight_min.js"></script>
+    <script src="/js/highlight_pack.js"></script>
+    <script src="/js/vue.js"></script>
+    <script src="/js/vue-lazyload.js"></script>
+    <script src="/js/marked.js"></script>
+    <script src="/js/lodash.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/Site.js"></script>
+    <script src="/js/Monitor.js"></script>
+    <title></title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="site-header">
+
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+            <div class="col-md-8" role="main">
+                <div id="lstPhoto">
+
+                    <div class="thumbnail photo-penal" v-for="item in Data">
+                        <a href="javascript:void(0)" v-on:click="displayPhoto(item.ID)">
+                            <div class="photo-item">
+                                <img class="lazyload" photo="img" @load="onImgLoad(item.ID)" :id="['img_'+item.ID]" v-lazy="item.SmallUrl" src="/images/white.gif" />
+                            </div>
+                            <div class="photo-title">
+                                <span style="color:#808080;">{{item.Title}}</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div style="clear:both;"></div>
+                    <nav aria-label="Page navigation">
+                        <ul id="pagination" class="pagination"></ul>
+                    </nav>
+
+                </div>
+            </div>
+            <div class="col-md-4 leftPack">
+
+                <h4>关于</h4>
+                <div slot="about"> </div>
+                <h4>系统资源</h4>
+                <div slot="system_info"> </div>
+                <h4>热门标签</h4>
+                <div slot="tags"></div>
+                <h4>置顶</h4>
+                <div slot="topBlog"></div>
+                <h4>最新文章</h4>
+                <div slot="newBlog"></div>
+                <h4>最新评论</h4>
+                <div slot="topComment"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="photo_view" style="display:none;">
+        <img src="/images/img_view_close.png" onclick="hidePhotoView()" style="float:right;margin-top:60px;margin-right:20px;" />
+        <div id="photo_view_panel">
+            <img id="view_img" src="" style="margin:auto;" />
+            <div id="photo_item_bar">
+                <a photoItem v-for="(item,index) in Data" href="javascript:void(0)" v-on:click="changeImg(index)"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+
+    <script>
+
+        var btnStyles = ["btn btn-default btn-xs", "btn btn-primary btn-xs",
+            "btn btn-success btn-xs", "btn btn-default btn-xs", "btn btn-info btn-xs", "btn btn-warning btn-xs", "btn btn-default btn-xs", "btn btn-danger btn-xs"];
+
+        var colorIndex = 0;
+
+        function getColor() {
+            colorIndex++;
+            return btnStyles[colorIndex % btnStyles.length];
+        }
+
+        var lstPhoto;
+
+        var selectIndex = 0;
+
+        var photo_item_bar;
+
+        var displayPhotos = false;
+
+        var timeOutID;
+
+        $(document).ready(function () {
+            Vue.use(VueLazyload);
+            photo_item_bar = new Vue({ el: '#photo_item_bar', data: { Data: [] } });
+            lstPhoto = new Vue({
+                el: '#lstPhoto', data: {
+                    Data: []
+                }
+
+            });
+            search();
+            $.goup({
+                trigger: 100,
+                bottomOffset: 50,
+                locationOffset: 20,
+                title: '',
+                titleAsText: true
+            });
+            $(window).resize(function () {
+                fullScreen();
+            });
+            $('#view_img').load(function () {
+                $(this).fadeIn("slow", function () {
+                    $('#photo_item_bar').fadeIn("slow");
+                    $('a[photoItem]').each(function (index) {
+
+                        if (index == selectIndex) {
+                            $(this).css("background-color", "#35a8ff");
+                        }
+                        else {
+                            $(this).css("background-color", "#ffffff");
+                        }
+                    });
+                });
+            });
+            fullScreen();
+
+        });
+
+
+        function fullScreen() {
+            var el = $('#photo_view');
+            var viewWidth = el.width();
+            var winWidth = $(window).width();
+            var winHeight = $(window).height();
+            el.css("left", "0px");
+            el.css("top", "0px");
+            el.css("width", winWidth + "px");
+            el.css("height", winHeight + "px");
+
+            var elPanel = $('#photo_view_panel');
+
+            var height = Math.abs(winHeight - 600) / 2;
+
+            height = 80;
+
+            elPanel.css("left", Math.abs(winWidth - 800) / 2 + "px");
+            elPanel.css("top", height + "px");
+        }
+
+        function hidePhotoView() {
+
+            displayPhotos = false;
+            $('#photo_view').hide('slow')
+            $(document.body).css({
+                "overflow": "auto"
+            });
+        }
+
+
+        function changeImg(index) {
+
+            selectIndex = index;
+            if (photo_item_bar.Data.length > 0) {
+                if (selectIndex >= photo_item_bar.Data.length)
+                    selectIndex = 0;
+                $('#photo_item_bar').hide();
+                $('#view_img').fadeOut("slow", function () {
+                    $('#view_img').attr('src', photo_item_bar.Data[selectIndex].LargeUrl);
+                    if (timeOutID)
+                        clearTimeout(timeOutID);
+                    timeOutID = setTimeout(function () {
+                        if (displayPhotos == true) {
+                            changeImg(selectIndex + 1);
+                        }
+                    }, 6000);
+
+                });
+
+            }
+        }
+
+
+        function displayPhoto(id) {
+            $(document.body).css({
+                "overflow-y": "hidden"
+            });
+            var el = $('#photo_view');
+            el.hide("slow", function () {
+
+                el.toggle('slide');
+            });
+
+            selectIndex = 0;
+            SiteGetPhoto(id).execute(function (r) {
+                photo_item_bar.Data = r.Data;
+                changeImg(0);
+            });
+        }
+
+        function search() {
+            var index = _url.fileNameWithOutExt;
+            index = parseInt(index);
+            SiteListPhoto(index).execute(function (r) {
+                displayPhotos = true;
+                lstPhoto.Data = r.Data.Items;
+                pagination_blog(index, r.Data.Pages);
+
+
+            });
+        }
+
+        function onImgLoad(id) {
+            var el = $('#img_' + id);
+            var width = el.width();
+            var height = el.height();
+            el.css("margin-left", (165 - width) / 2 + "px")
+            el.css("margin-top", (220 - height) / 2 + "px")
+
+        }
+
+        function pagination_blog(index, pages) {
+            if (pages <= 1)
+                return;
+            $('#pagination').empty();
+            if (pages < 10) {
+                for (i = 0; i < pages; i++) {
+                    var item = '<li><a  class="btn-xs" page="' + i + '" href="/photos/' + i + '.html">' + (i + 1) + '</a></li>';
+                    $('#pagination').append(item);
+                }
+            }
+            else {
+                var item = '<li><a  class="btn-xs" page="' + 0 + '" href="javascript:void(0)">1</a></li>';
+                $('#pagination').append(item);
+
+
+                for (i = index - 5; i < index + 1; i++) {
+                    if (i > 0 && i < pages - 1) {
+                        var item = '<li><a  class="btn-xs" page="' + i + '" href="/photos/' + i + '.html">' + (i + 1) + '</a></li>';
+                        $('#pagination').append(item);
+                    }
+                }
+
+
+                for (i = index + 1; i < index + 5; i++) {
+                    if (i < (pages - 1)) {
+                        var item = '<li><a  class="btn-xs" page="' + i + '" href="/photos/' + i + '.html">' + (i + 1) + '</a></li>';
+                        $('#pagination').append(item);
+                    }
+                }
+                if (pages > 1) {
+                    var item = '<li><a class="btn-xs" page="' + (pages - 1) + '" href="/photos/' + (pages - 1) + '.html">' + (pages) + '</a></li>';
+                    $('#pagination').append(item);
+                }
+            }
+            $('a').each(function () {
+                if ($(this).attr('page')) {
+                    $(this).css("margin", "2px")
+                };
+                if ($(this).attr('page') == index) {
+                    $(this).html('<span class="badge">' + (index + 1) + '</span>');
+                }
+            })
+        }
+
+    </script>
+</body>
+
+</html>

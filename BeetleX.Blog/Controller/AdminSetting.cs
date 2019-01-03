@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using BeetleX.Blog.DBModules;
 using BeetleX.FastHttpApi;
+using BeetleX.FastHttpApi.Data;
+
 namespace BeetleX.Blog.Controller
 {
     [Controller(BaseUrl = "/admin/setting")]
@@ -53,6 +55,8 @@ namespace BeetleX.Blog.Controller
             };
         }
 
+
+
         public string ESTest(string word)
         {
             return string.Join(',', ES.ESHelper.Blog.Analyze(word, Elasticsearch.AnalyzerType.ik_smart));
@@ -91,11 +95,12 @@ namespace BeetleX.Blog.Controller
                 return new ActionResult(500, "密码为空或不一致!");
             }
         }
-        public void UpdateSetting(string title, string host, string about)
+        public void UpdateSetting(string title, string host, string about, string imghost)
         {
             DBHelper.Default.Setting.Title.Value = title;
             DBHelper.Default.Setting.ElasticSearch.Value = host;
             DBHelper.Default.Setting.About.Value = about;
+            DBHelper.Default.Setting.ImgHost.Value = imghost;
             DBHelper.Default.Setting.Save();
             ES.ESHelper.Init(DBHelper.Default.Setting.ElasticSearch.Value);
         }
@@ -105,6 +110,42 @@ namespace BeetleX.Blog.Controller
             ES.ESHelper.ReCreateIndex();
         }
 
+        private static byte[] mImageBuffer = new byte[1024 * 500];
+
+        [Put]
+        [NoDataConvert]
+        public object UploadImage(string file, HttpRequest request)
+        {
+            lock (mImageBuffer)
+            {
+                request.Stream.Read(mImageBuffer, 0, request.Length);
+                string fileUrl = SaveImage(file, mImageBuffer, request.Length);
+                return fileUrl;
+            }
+        }
+
+        private string SaveImage(string file, byte[] data, int length)
+        {
+            int code = Math.Abs(file.GetHashCode());
+            string subfolder = (code % 10).ToString("00");
+            string filename = Units.ImagePath + subfolder
+                + System.IO.Path.DirectorySeparatorChar + file;
+            using (System.IO.Stream stream = System.IO.File.Create(filename))
+            {
+                stream.Write(data, 0, length);
+                stream.Flush();
+            }
+            string url = "/images/" + subfolder + "/" + file;
+            if (DBHelper.Default.Setting.ImgHost != null)
+            {
+                string[] hosts = DBHelper.Default.Setting.ImgHost.Value.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                if (hosts != null && hosts.Length > 0)
+                {
+                    url = "http://" + hosts[code % hosts.Length] + url;
+                }
+            }
+            return url;
+        }
 
         public void ReCreateJWT()
         {
@@ -121,7 +162,8 @@ namespace BeetleX.Blog.Controller
                 About = DBHelper.Default.Setting.About.Value,
                 ESStatus = ES.ESHelper.Available,
                 ESError = ES.ESHelper.InitError == null ? "" : ES.ESHelper.InitError.Message,
-                KEY = DBHelper.Default.Setting.JwtKey.Value
+                KEY = DBHelper.Default.Setting.JwtKey.Value,
+                ImgHost = DBHelper.Default.Setting.ImgHost.Value
             };
         }
 

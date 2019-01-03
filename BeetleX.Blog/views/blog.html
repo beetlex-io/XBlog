@@ -6,20 +6,21 @@
     <link href="/css/bootstrap.css" rel="stylesheet" />
     <link href="/css/bootstrap-theme.css" rel="stylesheet" />
     <link href="/css/site.css" rel="stylesheet" />
+
     <script src="/js/jquery.js"></script>
-    <script src="/js/ModuleLoader.js"></script>
-    <script src="/js/bootstrap.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <script src="/js/FastHttpApi.js"></script>
-    <script src="/js/Site.js"></script>
-    <link rel="stylesheet"
-          href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.13.1/build/styles/default.min.css">
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.13.1/build/highlight.min.js"></script>
-    <script src="/js/highlight_pack.js"></script>
     <script src="/js/jquery_goup.js"></script>
-    <script src="/js/Monitor.js"></script>
+    <script src="/js/highlight_min.js"></script>
+    <script src="/js/highlight_pack.js"></script>
+    <script src="/js/vue.js"></script>
+    <script src="/js/vue-lazyload.js"></script>
     <script src="/js/marked.js"></script>
     <script src="/js/lodash.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/Site.js"></script>
+    <script src="/js/Monitor.js"></script>
+
     <title></title>
 </head>
 <body>
@@ -35,11 +36,14 @@
                 <div id="viewBlog">
                     <div class="blog-Detail">
                         <div class="panel-body">
-                            <h4>
-                                <span v-if="Data.SourceUrl" class="label label-warning">转</span>
+                            <div class="form-inline blog-title">
+                                <span v-if="Data.SourceUrl" class="label label-warning blog-type">转</span>
+                                <span v-else class="label label-success blog-type">原</span>
+                                <h4>
+                                    <a href="#">{{Data.Title}}</a>
+                                </h4>
+                            </div>
 
-                                <span v-else class="label label-success">原</span> <a href="#">{{Data.Title}}</a>
-                            </h4>
                             <div style="margin-bottom:4px;">
                                 <span class="btn btn-xs"><img src="/images/date.png" />{{Data.CreateTime}}</span>
                                 <a :href="['/cate/'+Data.CategoryID+'.html']"><img src="/images/category.png" /> {{Data.Category}}</a>
@@ -57,49 +61,49 @@
                     </div>
                 </div>
 
-                <hr />
-                <h5>评论列表</h5>
-                <div id="lstComments">
-                    <div v-for="(item,i) in Data" class="comment-item">
-                        <div class="comment-header">
-                            <a><span class="badge">#{{i+1}}楼</span></a>
-                            <a class="btn btn-xs"><img src="/images/date.png" />{{item.CreateTime}}</a>
-                            <a href="#">({{item.NickName}})</a>
+                <div class="comment-panel">
+                    <h5>评论列表</h5>
+                    <div id="lstComments">
+                        <div v-for="(item,i) in Data" class="comment-item">
+                            <div class="comment-header">
+                                <a><span class="badge">#{{i+1}}楼</span></a>
+                                <a class="btn btn-xs"><img src="/images/date.png" />{{item.CreateTime}}</a>
+                                <a href="#">({{item.NickName}})</a>
+                            </div>
+                            <div v-html="marked(item.Content, { sanitize: true })" style="padding-left:20px;"></div>
                         </div>
-                        <div v-html="marked(item.Content, { sanitize: true })" style="padding-left:20px;"></div>
                     </div>
+                    <hr />
+                    <!--comment-->
+                    <form class="form-horizontal" id="addCommant">
+                        <div class="form-group">
+                            <label class="col-sm-offset-0 col-sm-11">发表评论</label>
+                            <div class="col-sm-offset-0 col-sm-11">
+                                <input type="text" v-model:value="nickName" class="form-control" placeholder="昵称">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-0 col-sm-11" style="margin-bottom:6px;">
+                                <button type="button" onclick="$('#txtEditor').show(); $('#txtView').hide()" class="btn  btn-default btn-sm">编辑</button>
+                                <button type="button" onclick="$('#txtEditor').hide(); $('#txtView').show()" class="btn  btn-default btn-sm">预览</button>
+                                <a class="btn  btn-default btn-sm" href="http://www.freeimagehosting.net/" target="_blank">图片上传</a>
+                                支持Markdown内容
+                            </div>
+
+
+
+                            <div id="txtEditor" class="col-sm-offset-0 col-sm-11">
+                                <textarea :value="content" @input="update" rows="10" style="width:100%"></textarea>
+                            </div>
+                            <div id="txtView" style="display:none;height:220px;overflow-y: auto; overflow-x:hidden;" class="col-sm-offset-0 col-sm-11" v-html="compiledMarkdown">
+
+                            </div>
+
+
+                        </div>
+                        <button type="button" onclick="saveComment()" class=" col-sm-offset-0 btn btn-default">提交</button>
+                    </form>
                 </div>
-                <hr />
-                <!--comment-->
-                <form class="form-horizontal" id="addCommant">
-                    <div class="form-group">
-                        <label class="col-sm-offset-0 col-sm-11">发表评论</label>
-                        <div class="col-sm-offset-0 col-sm-11">
-                            <input type="text" v-model:value="nickName" class="form-control" placeholder="昵称">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-offset-0 col-sm-11" style="margin-bottom:6px;">
-                            <button type="button" onclick="$('#txtEditor').show(); $('#txtView').hide()" class="btn  btn-default btn-sm">编辑</button>
-                            <button type="button" onclick="$('#txtEditor').hide(); $('#txtView').show()" class="btn  btn-default btn-sm">预览</button>
-                            <a class="btn  btn-default btn-sm" href="http://www.freeimagehosting.net/" target="_blank">图片上传</a>
-                            支持Markdown内容
-                        </div>
-
-
-
-                        <div id="txtEditor" class="col-sm-offset-0 col-sm-11">
-                            <textarea :value="content" @input="update" rows="10" style="width:100%"></textarea>
-                        </div>
-                        <div id="txtView" style="display:none;height:220px;overflow-y: auto; overflow-x:hidden;" class="col-sm-offset-0 col-sm-11" v-html="compiledMarkdown">
-
-                        </div>
-
-
-                    </div>
-                    <button type="button" onclick="saveComment()" class=" col-sm-offset-0 btn btn-default">提交</button>
-                </form>
-
             </div>
             <div class="col-md-4 leftPack">
 
@@ -171,6 +175,7 @@
                     document.title = document.title + r.Data.Title;
                 else
                     document.title = r.Data.Title;
+                addCommant.nickName = r.Data.NickName;
             });
 
             $.goup({
@@ -188,7 +193,7 @@
                     $('pre code').css("color", '#000');
                 });
             }, 500);
-           
+
         });
 
         function saveComment() {
@@ -207,7 +212,6 @@
             SiteCommint(_url.fileNameWithOutExt, addCommant.nickName, addCommant.content, true).execute(function (r) {
                 loadComments();
                 addCommant.content = '';
-                addCommant.nickName = '';
             });
         }
 

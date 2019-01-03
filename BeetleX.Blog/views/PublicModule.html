@@ -12,7 +12,7 @@
                     <img src="/images/home_icon.png" style="float:left;margin-top:-6px;padding-right:6px;" />{{Data.Title}}
 
                 </a>
-                
+
             </div>
             <div class="navbar-collapse collapse" role="navigation">
                 <ul class="nav navbar-nav">
@@ -21,17 +21,21 @@
                         <a :href="['/cate/'+item.ID+'.html']">{{item.Name}}</a>
 
                     </li>
+                    <li><a href="/photos/0.html">相册</a></li>
+                    <li>
+                        <div class="form-group form-inline form-group-sm" style="padding-top:10px;margin-bottom:0px;margin-left:20px;">
+                            <label for="inputPassword2" class="sr-only">Password</label>
+                            <input id="txtSearch" type="text" onkeypress="if (event.keyCode == 13) { blogSearch();}" class="form-control" placeholder="查询">
+                            <a href="javascript:void(0)" onclick="blogSearch()"><img src="/images/search.png" style="width:16px;" /></a>
+                        </div>
 
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <form class="form-inline form-group-sm" style="padding-top:10px;padding-right:20px;">
-                            <div class="form-group">
-                                <label for="inputPassword2" class="sr-only">Password</label>
-                                <input id="txtSearch" type="text" class="form-control" placeholder="查询">
-                            </div>
-                            <a href="javascript:void(0)" onclick="blogSearch()"><img src="/images/search.png" style="width:16px;" /></a>
-                        </form>
+                      
+                     
+                      
                     </li>
                     <li><a href="/admin/">管理</a></li>
                 </ul>
@@ -137,7 +141,7 @@
         </script>
     </template>
     <template id="header">
-        <div class="navbar-header" style="background-color:#565555">
+        <div class="navbar-header" >
             <a class="navbar-brand" href="/admin/" style="color:white;width:220px;">
                 <img src="/images/admin/admin.png" style="float:left;margin-top:-2px;margin-right:10px;" /><span>BeetleX Blog</span>
             </a>
@@ -153,7 +157,7 @@
 
                 </li>
                 <li><a href="categories.html"><img src="/images/admin/cate.png" />分类管理</a></li>
-
+                <li><a href="photos.html"><img src="/images/admin/photo.png" />个人相册</a></li>
 
                 <li><a href="comments.html"><img src="/images/admin/talk.png" />留言管理</a></li>
                 <li><a href="files.html"><img src="/images/admin/file.png" />文件管理</a></li>
@@ -170,7 +174,7 @@
     <template id="footer">
         <div class="blog-footer">
             <hr />
-            <p>BeetleX Blog Copyright © 2018 ikende.com email:henryfan@msn.com <a href="https://github.com/ikende" target="_blank">github.com</a></p>
+            <p>XBlog Copyright © 2018 <a href="http://www.ikende.com" target="_blank">ikende.com</a> email:henryfan@msn.com <a href="https://github.com/ikende" target="_blank">github.com</a></p>
         </div>
     </template>
 

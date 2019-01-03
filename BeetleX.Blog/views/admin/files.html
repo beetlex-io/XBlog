@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="/js/FastHttpApi.js"></script>
     <script src="/js/admin/FileManagerController.js"></script>
-    <script src="/js/ReadFileHandler.js"></script>
+    <script src="/js/admin/ReadFileHandler.js"></script>
     <script src="/js/marked.js"></script>
     <script src="/js/lodash.js"></script>
     <title>BeetleX Blog Admin</title>
@@ -30,13 +30,15 @@
     <div class="container bs-docs-container">
 
         <div class="row">
-            <form class="navbar-form navbar-left btn-group-sm" style="margin-bottom:4px;" role="search">
+            <div class="form-inline form-group-sm btn-group-sm" style="margin-bottom:4px;" role="search">
                 <div class="form-group">
                     <input id="folderName" type="text" class="form-control" placeholder="文件夹名称">
-                </div>
-                <a href="javascript:void(0)" class="btn btn-default" onclick="CreateFolder()">添加文件夹</a>
 
-            </form>
+                </div>
+
+                <button class="btn btn-default form-control" onclick="CreateFolder()">添加文件夹</button>
+                <button class="btn btn-default form-control" onclick="$('#upfile_1').trigger('click');">上传文件</button>
+            </div>
         </div>
         <div class="row">
             <div class="col-md-7">
@@ -55,7 +57,7 @@
 
             <div class="col-md-4">
                 <div class="form-group">
-                    <input id="upfile" type="file" multiple="multiple" class="file">
+                    <input id="upfile_1" type="file" multiple="multiple" class="btn btn-default" style="display:none;" >
                 </div>
                 <div id="updateBars">
                     <div v-for="item in Data" class="progress" style="margin:0px;margin-top:6px;">
@@ -84,7 +86,7 @@
             lstDocControl = new Vue({ el: '#lstDoc', data: { Data: [] } });
             lstUploadControl = new Vue({ el: '#updateBars', data: { Data: uploadItems } });
             listResource();
-            $('#upfile').change(function handleFileSelect(evt) {
+            $('#upfile_1').change(function(evt) {
                 if (evt.target.files && evt.target.files.length > 0) {
                     var files = evt.target.files;
                     for (var i = 0; i < files.length; i++) {

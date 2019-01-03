@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    <script src="/js/jquery.js"></script>
+    <script src="/js/ModuleLoader.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/js/FastHttpApi.js"></script>
+    <script src="/js/admin/AdminSetting.js"></script>
+    <script src="/js/admin/AdminPhoto.js"></script>
+    <title>BeetleX Blog Admin</title>
+</head>
+<body>
+
+
+    <div class="navbar navbar-inverse navbar-fixed-left" slot="header">
+
+    </div>
+    <div class="page-title">
+        <img src="/images/admin/nav.png" /> <h3>个人相册</h3>
+    </div>
+
+    <div class="container bs-docs-container">
+        <div class="row">
+            <div style="padding:5px;">
+                <form class="form-inline form-group-sm" id="cateCreater">
+                    <input onclick="selectAll(this)" type="checkbox" />全选
+                    <div class="form-group">
+                        <label for="exampleInputName2">相册名称</label>
+                        <input id="txtTitle" type="text" class="form-control" placeholder="name">
+                    </div>
+
+                    <button type="button" onclick="Add();" class="btn  btn-default btn-sm">添加</button>
+                    <button type="button" onclick="del();" class="btn  btn-default btn-sm">删除</button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="row" id="lstPhoto">
+
+            <div class="thumbnail photo-penal" v-for="item in Data">
+                <div class="photo-item">
+                    <img photo="img" @load="onImgLoad(item.ID)" :id="['img_'+item.ID]" :src="item.SmallUrl" />
+                </div>
+                <div class="photo-title"><input v-bind:id="item.ID" type="checkbox" /><a :href="['photoitems.html?id='+item.ID]"><span>{{item.Title}}</span></a> </div>
+            </div>
+            <div style="clear:both;"></div>
+            <nav aria-label="Page navigation">
+                <ul id="pagination" class="pagination"></ul>
+            </nav>
+        </div>
+    </div>
+
+
+
+    <div class="container" style="text-align:center;" slot="footer">
+
+    </div>
+    <script>
+        var lstPhoto;
+        $(document).ready(function () {
+            lstPhoto = new Vue({
+                el: '#lstPhoto', data: {
+                    Data: []
+                }
+
+            });
+            pageChange(0);
+        });
+
+        function onImgLoad(id) {
+            var el = $('#img_' + id);
+            var width = el.width();
+            var height = el.height();
+            el.css("margin-left", (165 - width) / 2 + "px")
+            el.css("margin-top", (220 - height) / 2 + "px")
+
+        }
+        function getSelectItems() {
+            var items = new Array();
+            $("input[type='checkbox']").each(function () {
+                if ($(this).prop("checked") == true && $(this).prop("id"))
+                    items.push($(this).attr('id'));
+            });
+            return items;
+        }
+
+        function del() {
+            var items = getSelectItems();
+            if (items.length == 0) {
+                alert('请选择删除的相册');
+                return;
+            }
+            if (confirm('是否要删除已选择的相册?')) {
+                AdminPhotoDel(items).execute(function (r) {
+                    pageChange(0);
+                });
+            }
+        }
+
+        function selectAll(e) {
+            var checkedOfAll = $(e).prop("checked");
+            $("input[type='checkbox']").prop("checked", checkedOfAll);
+        }
+
+        function pageChange(index) {
+            AdminPhotoList(index).execute(function (r) {
+                lstPhoto.Data = r.Data.Items;
+                pagination(index, r.Data.Pages);
+
+
+            });
+        }
+        function Add() {
+            var title = $('#txtTitle').val();
+            if (!title) {
+                alert('请输入相册名称');
+                return;
+            }
+            AdminPhotoAdd(title).execute(function (r) {
+                $('#txtTitle').val('');
+                pageChange(0);
+            });
+        }
+    </script>
+</body>
+
+</html>

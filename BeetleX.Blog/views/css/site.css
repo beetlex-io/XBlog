@@ -3,6 +3,7 @@
 
 .navbar {
     border-radius: 0px;
+    z-index: 9999;
 }
 
 .navbar-inverse .navbar-nav > li > a {
@@ -34,6 +35,8 @@
     padding-right: 20px;
 }
 
+
+
     .navbar-header a {
         color: white;
     }
@@ -44,16 +47,34 @@
 
 .leftPack {
     margin-top: 10px;
-    border-left: dotted;
-    border-left-width: 1px;
 }
 
+    .leftPack h1, .leftPack h2, .leftPack h3, .leftPack h4 {
+        box-shadow: 1px 1px 1px #e1e1e1;
+        padding: 6px;
+        border-radius: 4px;
+        border: solid;
+        border-width: 1px;
+        border-color: #cbcbcb;
+        margin-left: -10px;
+        background-color: #e9e9e9;
+        font-size: 12pt;
+        padding-left: 10px;
+    }
+
+    .leftPack p {
+        line-height: 26px;
+        margin-bottom: 2px;
+        margin-top: 2px;
+    }
+
+    .leftPack li {
+        line-height: 26px;
+    }
+
     .leftPack h4 {
-        border-bottom: solid;
-        border-bottom-width: 1px;
         padding-bottom: 4px;
         margin-top: 10px;
-        border-bottom-color: #e2e2e2;
         margin-bottom: 6px;
     }
 
@@ -107,51 +128,75 @@ a {
         color: #35a8ff
     }
 
-.blog-item {
-    border: none;
+#lstBlog {
+    z-index: 0;
+    box-shadow: 0px 0px 4px #888888;
+    padding: 10px;
+    margin-top: -6px;
+    border-radius: 4px;
 }
 
-    .blog-item h4 {
-        font-size: 12pt;
-        border-bottom: dotted;
-        border-bottom-width: 1px;
-        padding-bottom: 10px;
-        margin-bottom: 6px;
-        border-bottom-color: #9a9a9a;
-    }
+.blog-item {
+    border: none;
+    border-radius: 4px;
+}
 
-    .blog-item img {
-        margin-top: -3px;
-        padding-right: 2px;
-        padding-left: 4px;
-    }
-
-    .blog-item a {
-        margin-right: 4px;
-    }
-
-
-.blog-Detail h4 {
-    font-size: 12pt;
-    border-bottom: dotted;
+.blog-title {
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom-style: dotted;
+    border-bottom-color: #cbcbcb;
     border-bottom-width: 1px;
-    padding-bottom: 10px;
-    border-bottom-color: #9a9a9a;
+}
+
+.blog-type {
+    float: left;
+}
+
+
+.blog-item h4 {
+    display: initial;
+    margin-left: 10px;
+    font-size: 12pt;
     margin-bottom: 6px;
 }
 
-.blog-Detail img {
+.blog-item img {
     margin-top: -3px;
     padding-right: 2px;
     padding-left: 4px;
 }
 
-.blog-Detail a {
+.blog-item a {
     margin-right: 4px;
 }
 
+.blog-Detail {
+    box-shadow: 0px 0px 3px #b2b2b2;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+    .blog-Detail h4 {
+        font-size: 12pt;
+        display: inline;
+        padding-left: 10px;
+    }
+
+    .blog-Detail img {
+        margin-top: -3px;
+        padding-right: 2px;
+        padding-left: 4px;
+    }
+
+    .blog-Detail a {
+        margin-right: 4px;
+    }
+
 .blog-Body p {
-    line-height: 22px;
+    line-height: 26px;
+    margin-bottom: 2px;
+    margin-top: 2px;
 }
 
 .blog-Body h1, .blog-Body h2, .blog-Body h3, .blog-Body h4, .blog-Body h5, .blog-Body h6, .blog-Body h7 {
@@ -164,7 +209,7 @@ a {
     padding-left: 20px;
 }
 
-#aboutInfo h1, #aboutInfo h2, #aboutInfo h3, #aboutInfo h4, #aboutInfo h5, #aboutInfo h6, #aboutInfo h7 {
+#aboutInfo h5, #aboutInfo h6, #aboutInfo h7 {
     margin: 0px;
     padding: 0px;
     margin-bottom: 6px;
@@ -201,10 +246,20 @@ a {
     padding: 0px;
 }
 
+.comment-panel {
+    margin-top: 20px;
+    box-shadow: 0px 0px 3px #b2b2b2;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 4px;
+}
+
 .comment-header {
     border-bottom-width: 1px;
-    border-bottom-style: dotted;
-    border-bottom-color: black;
+    border-bottom-style: solid;
+    border-bottom-color: #e1e1e1;
     padding: 4px;
     margin-bottom: 4px;
 }
@@ -228,19 +283,98 @@ pre {
 code {
     line-height: 20px;
 }
+
 .Version {
     margin-top: 34px;
-    margin-left:-60px;
+    margin-left: -60px;
     position: fixed;
-    float:right;
+    float: right;
     font-size: 8pt;
     padding-left: 4px;
     color: #ffffff;
 }
-    
 
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+}
 
+.btn {
+    background-image: none;
+}
 
+.photo-penal {
+    width: 170px;
+    height: 260px;
+    float: left;
+    margin: 6px;
+    box-shadow: 1px 1px 2px #cbcbcb;
+}
+
+.photo-item {
+    width: 160px;
+    height: 220px;
+    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    border-radius: 4px;
+}
+
+    .photo-item img {
+    }
+
+#lstPhoto {
+    padding-top: 10px;
+}
+
+.photo-title {
+    height: 30px;
+    display: block;
+    padding: 4px;
+    width: 100%;
+    text-align: center;
+}
+
+    .photo-title a {
+    }
+
+#photo_view {
+    z-index: 3000;
+    text-align: center;
+    top: 150px;
+    position: fixed;
+    background-color: rgba(36, 36, 36, 0.73);
+    box-shadow: 1px 1px 5px rgba(108, 108, 108, 0.85);
+    border-radius: 10px;
+}
+
+#photo_view_panel {
+    height: 600px;
+    width: 800px;
+    text-align: center;
+    position: fixed;
+    z-index: 3001;
+}
+
+#view_img {
+    border-radius: 6px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #b2b2b2;
+    box-shadow: 0px 0px 8px #ffffff;
+}
+#photo_item_bar
+{
+    margin-top:-30px;
+}
+    #photo_item_bar a {
+        margin: 4px;
+        box-shadow: 0px 0px 8px rgb(36, 36, 36);
+        width: 12px;
+        height: 12px;
+        display: inline-grid;
+        border-radius: 6px;
+        background-color: #ffffff;
+    }
 /*
 
 Visual Studio-like style based on original C# coloring by Jason Diamond <jason@diamond.name>

@@ -3,10 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>0.5.8.0</Version>
+    <Version>1.0.0.0</Version>
     <Authors>henryfan</Authors>
     <Company>ikende.com</Company>
     <Copyright>Copyright © ikende.com 2018 email:henryfan@msn.com</Copyright>
+    <PackageLicenseUrl>https://github.com/IKende/XBlog/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/IKende/XBlog</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +21,8 @@
     <None Remove="views\admin\index.html" />
     <None Remove="views\admin\login.html" />
     <None Remove="views\admin\password.html" />
+    <None Remove="views\admin\photoitems.html" />
+    <None Remove="views\admin\photos.html" />
     <None Remove="views\admin\setting.html" />
     <None Remove="views\admin\system.html" />
     <None Remove="views\blog.html" />
@@ -44,6 +48,7 @@
     <None Remove="views\images\admin\home_page.png" />
     <None Remove="views\images\admin\nav.png" />
     <None Remove="views\images\admin\password.png" />
+    <None Remove="views\images\admin\photo.png" />
     <None Remove="views\images\admin\setting.png" />
     <None Remove="views\images\admin\statu_error.png" />
     <None Remove="views\images\admin\statu_ok.png" />
@@ -55,19 +60,26 @@
     <None Remove="views\images\category.png" />
     <None Remove="views\images\date.png" />
     <None Remove="views\images\home_icon.png" />
+    <None Remove="views\images\img_view_close.png" />
     <None Remove="views\images\refresh.png" />
     <None Remove="views\images\search.png" />
+    <None Remove="views\images\small_img.jpg" />
+    <None Remove="views\images\small_img.png" />
+    <None Remove="views\images\some.png" />
     <None Remove="views\images\tags.png" />
     <None Remove="views\images\user.png" />
+    <None Remove="views\images\white.gif" />
     <None Remove="views\index.html" />
     <None Remove="views\js\admin\AdminBlog.js" />
     <None Remove="views\js\admin\AdminCategory.js" />
     <None Remove="views\js\admin\AdminComment.js" />
+    <None Remove="views\js\admin\AdminPhoto.js" />
     <None Remove="views\js\admin\AdminSetting.js" />
     <None Remove="views\js\admin\FileManagerController.js" />
+    <None Remove="views\js\admin\ReadFileHandler.js" />
     <None Remove="views\js\bootstrap.js" />
     <None Remove="views\js\FastHttpApi.js" />
-    <None Remove="views\js\FileManagerController.js" />
+    <None Remove="views\js\highlight_min.js" />
     <None Remove="views\js\highlight_pack.js" />
     <None Remove="views\js\jquery.js" />
     <None Remove="views\js\jquery_goup.js" />
@@ -76,8 +88,10 @@
     <None Remove="views\js\md5.js" />
     <None Remove="views\js\ModuleLoader.js" />
     <None Remove="views\js\Monitor.js" />
-    <None Remove="views\js\ReadFileHandler.js" />
     <None Remove="views\js\Site.js" />
+    <None Remove="views\js\vue-lazyload.js" />
+    <None Remove="views\js\vue.js" />
+    <None Remove="views\photos.html" />
     <None Remove="views\PublicModule.html" />
     <None Remove="views\tags.html" />
   </ItemGroup>
@@ -91,6 +105,8 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="views\admin\login.html" />
+    <EmbeddedResource Include="views\admin\photoitems.html" />
+    <EmbeddedResource Include="views\admin\photos.html" />
     <EmbeddedResource Include="views\admin\setting.html" />
     <EmbeddedResource Include="views\admin\system.html" />
     <EmbeddedResource Include="views\admin\comments.html" />
@@ -131,6 +147,7 @@
     <EmbeddedResource Include="views\images\admin\home_page.png" />
     <EmbeddedResource Include="views\images\admin\nav.png" />
     <EmbeddedResource Include="views\images\admin\password.png" />
+    <EmbeddedResource Include="views\images\admin\photo.png" />
     <EmbeddedResource Include="views\images\admin\setting.png" />
     <EmbeddedResource Include="views\images\admin\statu_error.png" />
     <EmbeddedResource Include="views\images\admin\statu_ok.png" />
@@ -142,21 +159,28 @@
     <EmbeddedResource Include="views\images\category.png" />
     <EmbeddedResource Include="views\images\date.png" />
     <EmbeddedResource Include="views\images\home_icon.png" />
+    <EmbeddedResource Include="views\images\img_view_close.png" />
     <EmbeddedResource Include="views\images\refresh.png" />
     <EmbeddedResource Include="views\images\search.png" />
+    <EmbeddedResource Include="views\images\small_img.jpg" />
+    <EmbeddedResource Include="views\images\small_img.png" />
+    <EmbeddedResource Include="views\images\some.png" />
     <EmbeddedResource Include="views\images\tags.png" />
     <EmbeddedResource Include="views\images\user.png" />
+    <EmbeddedResource Include="views\images\white.gif" />
     <EmbeddedResource Include="views\index.html" />
     <EmbeddedResource Include="views\js\admin\AdminBlog.js" />
     <EmbeddedResource Include="views\js\admin\AdminCategory.js" />
     <EmbeddedResource Include="views\js\admin\AdminComment.js" />
+    <EmbeddedResource Include="views\js\admin\AdminPhoto.js" />
     <EmbeddedResource Include="views\js\admin\AdminSetting.js" />
     <EmbeddedResource Include="views\js\admin\FileManagerController.js" />
+    <EmbeddedResource Include="views\js\admin\ReadFileHandler.js" />
     <EmbeddedResource Include="views\js\bootstrap.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="views\js\FastHttpApi.js" />
-    <EmbeddedResource Include="views\js\FileManagerController.js" />
+    <EmbeddedResource Include="views\js\highlight_min.js" />
     <EmbeddedResource Include="views\js\highlight_pack.js" />
     <EmbeddedResource Include="views\js\jquery.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
@@ -173,10 +197,10 @@
     <EmbeddedResource Include="views\js\Monitor.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="views\js\ReadFileHandler.js">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="views\js\Site.js" />
+    <EmbeddedResource Include="views\js\vue-lazyload.js" />
+    <EmbeddedResource Include="views\js\vue.js" />
+    <EmbeddedResource Include="views\photos.html" />
     <EmbeddedResource Include="views\PublicModule.html">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -185,7 +209,7 @@
 
   <ItemGroup>
     <PackageReference Include="BeetleX.Elasticsearch" Version="0.1.0" />
-    <PackageReference Include="BeetleX.FastHttpApi" Version="1.1.4.6" />
+    <PackageReference Include="BeetleX.FastHttpApi" Version="1.1.5.6" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
     <PackageReference Include="Peanut" Version="1.0.8.2" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109.2" />
@@ -211,6 +235,13 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AdminComment.cs</DependentUpon>
     </None>
+    <None Update="Controller\AdminPhoto.js">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AdminPhoto.cs</DependentUpon>
+      <Generator>Peanut</Generator>
+      <LastGenOutput>AdminPhoto.Model.cs</LastGenOutput>
+    </None>
     <None Update="Controller\AdminSetting.js">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -229,6 +260,14 @@
     <None Update="HttpConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="views\js\FileManagerController.js">
+      <Generator>Peanut</Generator>
+      <LastGenOutput>FileManagerController.Model.cs</LastGenOutput>
+    </None>
+    <None Update="views\js\ReadFileHandler.js">
+      <Generator>Peanut</Generator>
+      <LastGenOutput>ReadFileHandler.Model.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -243,6 +282,15 @@
     <Compile Update="Controller\AdminComment.cs">
       <Generator>JSAPI</Generator>
       <LastGenOutput>AdminComment.js</LastGenOutput>
+    </Compile>
+    <Compile Update="Controller\AdminPhoto.cs">
+      <Generator>JSAPI</Generator>
+      <LastGenOutput>AdminPhoto.js</LastGenOutput>
+    </Compile>
+    <Compile Update="Controller\AdminPhoto.Model.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AdminPhoto.js</DependentUpon>
     </Compile>
     <Compile Update="Controller\AdminSetting.cs">
       <Generator>JSAPI</Generator>
@@ -283,6 +331,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Comment.cs</DependentUpon>
     </Compile>
+    <Compile Update="DBModules\IPhoto.cs">
+      <Generator>Peanut</Generator>
+      <LastGenOutput>IPhoto.Model.cs</LastGenOutput>
+    </Compile>
+    <Compile Update="DBModules\IPhoto.Model.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IPhoto.cs</DependentUpon>
+    </Compile>
     <Compile Update="DBModules\ISequence.cs">
       <Generator>Peanut</Generator>
       <LastGenOutput>ISequence.Model.cs</LastGenOutput>
@@ -300,6 +357,16 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ISetting.cs</DependentUpon>
+    </Compile>
+    <Compile Update="views\js\FileManagerController.Model.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FileManagerController.js</DependentUpon>
+    </Compile>
+    <Compile Update="views\js\ReadFileHandler.Model.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ReadFileHandler.js</DependentUpon>
     </Compile>
   </ItemGroup>
 

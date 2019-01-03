@@ -38,17 +38,19 @@
                 <div class="form-group">
                     <div class="col-sm-offset-1 col-sm-10" style="margin-bottom:6px;">
 
-                        <a class="btn  btn-default btn-sm" href="http://www.freeimagehosting.net/" target="_blank">图片上传</a>
-                        <button type="button" onclick="$('#upimage').trigger('click');" class="btn  btn-default btn-sm">腾讯云图片</button>
+                        <a class="btn  btn-default btn-sm" href="http://www.freeimagehosting.net/" target="_blank">站外图片</a>
+                        <button type="button" onclick="$('#webImg').trigger('click');" class="btn  btn-default btn-sm">站内图片</button>
+                        <button type="button" onclick="$('#TCouldImg').trigger('click');" class="btn  btn-default btn-sm">腾讯云图片</button>
                         <button type="button" onclick="$('#upfile').trigger('click');" class="btn  btn-default btn-sm">腾讯云文件</button>
                         <button type="button" onclick="insertCode()" class="btn  btn-default btn-sm">代码</button>
-                        <input id="upimage" type="file" style="display:none" />
+                        <input id="webImg" type="file" style="display:none" multiple />
+                        <input id="TCouldImg" type="file" style="display:none" multiple />
                         <input id="upfile" type="file" style="display:none" />
                         <label>文章内容(Markdown)</label>
                         <a href="javascript:void(0)" onclick="$('#txtEditor').show(); $('#txtView').hide()" class="">编辑</a>
                         <a href="javascript:void(0)" onclick="$('#txtEditor').hide(); $('#txtView').show()" class="">预览</a>
                         <div id="imgLoading" style="display:none;">
-                            <span><img src="/images/ajax-loader.gif" />文件上传中...</span>
+                            <span id="txtLoading"><img src="/images/ajax-loader.gif" />文件上传中...</span>
                         </div>
 
                     </div>
@@ -134,80 +136,101 @@
                 LoadBlog();
             ListCategories();
             bindUploadFile();
+            $('#txtContent').bind('paste', function (event) {
+
+                var e = event.originalEvent;
+                var items = e.clipboardData.items;
+                for (var i = 0; i < items.length; ++i) {
+                    if (items[i].kind == 'file' && items[i].type.indexOf('image/') >= 0) {
+                        e.preventDefault();
+                        var blob = items[i].getAsFile();
+                        LoadResizeImageData(blob, function (file, buffer) {
+                            var d = new Date();
+                            var n = d.getTime();
+                            file = n.toString() + "_" + file;
+                            $.ajax({
+                                url: '/admin/setting/UploadImage?file=' + encodeURI(file),
+                                type: 'PUT',
+                                data: buffer,
+                                contentType: false,
+                                processData: false,
+                                beforeSend: function (xhr) {
+                                    $('#imgLoading').show();
+                                },
+                                success: function (result) {
+                                    var str = "\r\n\r\n";
+                                    str += "![](" + result.Data + ")";
+                                    str += "\r\n\r\n";
+                                    var el = $('#txtContent');
+                                    var newText = str;
+                                    var start = el.prop("selectionStart")
+                                    var end = el.prop("selectionEnd")
+                                    var text = el.val()
+                                    var before = text.substring(0, start)
+                                    var after = text.substring(end, text.length)
+                                    el.val(before + newText + after)
+                                    el[0].selectionStart = el[0].selectionEnd = start + newText.length
+                                    el.focus()
+                                    var text = el.val();
+                                    blogEditor.content = text;
+                                },
+                                complete: function (jqXHR, textStatus) {
+                                    if (textStatus != 'success')
+                                        alert("Error:" + jqXHR.responseText);
+                                    $('#imgLoading').hide();
+                                }
+                            });
+                        });
+
+
+                    };
+                };
+            });
         });
 
-
-        function ResizeImage(file) {
+        function LoadResizeImageData(file, callback) {
             var filename = file.name;
-            AdminSettingGetFileAndTCloudToken(filename).execute(function (r) {
-                var token = r.Data.Token;
-                var url = r.Data.Url;
-                var img = document.createElement("img");
-                img.onload = function () {
-                    var canvas = document.createElement("canvas");
-                    var MAX_WIDTH = 600;
-                    var MAX_HEIGHT = 480;
-                    var width = img.width;
-                    var height = img.height;
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
+            var img = document.createElement("img");
+            img.onload = function () {
+                var canvas = document.createElement("canvas");
+                var MAX_WIDTH = 800;
+                var MAX_HEIGHT = 600;
+                var width = img.width;
+                var height = img.height;
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
                     }
-                    canvas.width = width;
-                    canvas.height = height;
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0, width, height);
-                    var dataUrl = canvas.toDataURL('image/jpeg', 0.96);
-                    var byteString = atob(dataUrl.split(',')[1]);
-                    var ab = new ArrayBuffer(byteString.length);
-                    var ia = new Uint8Array(ab);
-                    for (var i = 0; i < byteString.length; i++) {
-                        ia[i] = byteString.charCodeAt(i);
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
                     }
-                    $.ajax({
-                        url: url,
-                        type: 'PUT',
-                        data: ab,
-                        contentType: false,
-                        processData: false,
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader("Authorization", token);
-                            $('#imgLoading').show();
-                        },
-                        success: function (result) {
-                            var str = $('#txtContent').val();
-                            str += "\r\n\r\n";
-                            str += "![](" + url + ")";
-                            str += "\r\n\r\n";
-                            $('#txtContent').val(str);
-                            $('#txtView').html(marked(str, { sanitize: true }));
-                        },
-                        complete: function (jqXHR, textStatus) {
-                            if (textStatus != 'success')
-                                alert("Error:" + jqXHR.responseText);
-                            $('#imgLoading').hide();
-                        }
-                    });
-
                 }
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    img.src = e.target.result;
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                var dataUrl = canvas.toDataURL('image/jpeg', 0.98);
+                var byteString = atob(dataUrl.split(',')[1]);
+                var ab = new ArrayBuffer(byteString.length);
+                var ia = new Uint8Array(ab);
+                for (var i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
                 }
-                reader.readAsDataURL(file);
-            });
+                callback(filename, ab);
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
         }
 
         function insertCode() {
             var str = $('#txtContent').val();
-            str += "```\r\n";
+            str += "\r\n```\r\n";
             str += "代码\r\n";
             str += "```\r\n";
             $('#txtContent').val(str);
@@ -215,47 +238,27 @@
         }
 
         function bindUploadFile() {
-            $('#upimage').change(function (evt) {
+            $('#webImg').change(function (evt) {
                 if (evt.target.files && evt.target.files.length > 0) {
-                    var file = evt.target.files[0];
-                    var name = file.name.toLowerCase();
-                    if (name.indexOf('.jpg') || name.indexOf('.png')) {
-                        ResizeImage(file);
-                    }
-                    else {
-                        alert('请选择jpg或png图片!');
-                    }
-
-                }
-            });
-
-
-            $('#upfile').change(function (evt) {
-                if (evt.target.files && evt.target.files.length > 0) {
-                    var file = evt.target.files[0];
-                    var filename = file.name;
-                    AdminSettingGetFileAndTCloudToken(filename).execute(function (r) {
-                        var token = r.Data.Token;
-                        var url = r.Data.Url;
-                        var reader = new FileReader();
-                        reader.onload = function (evt) {
-                            if (evt.target.readyState == FileReader.DONE) {
-                                var buffer = reader.result;
+                    for (var i = 0; i < evt.target.files.length; i++) {
+                        var file = evt.target.files[i];
+                        var name = file.name.toLowerCase();
+                        if (name.indexOf('.jpg') || name.indexOf('.png')) {
+                            LoadResizeImageData(file, function (filename, buffer) {
                                 $.ajax({
-                                    url: url,
+                                    url: '/admin/setting/UploadImage?file=' + encodeURI(filename),
                                     type: 'PUT',
                                     data: buffer,
                                     contentType: false,
                                     processData: false,
                                     beforeSend: function (xhr) {
-                                        xhr.setRequestHeader("Authorization", token);
                                         $('#imgLoading').show();
                                     },
                                     success: function (result) {
-                                        var str = $('#txtContent').val();
-                                        str += "[" + filename + "](" + encodeURI(url) + ")";
-                                        $('#txtContent').val(str);
-                                        $('#txtView').html(marked(str, { sanitize: true }));
+                                        var str = "\r\n";
+                                        str += "![](" + result.Data + ")";
+                                        str += "\r\n";
+                                        blogEditor.content += str;
                                     },
                                     complete: function (jqXHR, textStatus) {
                                         if (textStatus != 'success')
@@ -263,11 +266,97 @@
                                         $('#imgLoading').hide();
                                     }
                                 });
-                            }
-                        };
-                        var blob = file.slice(0, file.size);
-                        reader.readAsArrayBuffer(blob);
-                    });
+                            });
+                        }
+                        else {
+                            alert(name + '无效，请选择jpg或png图片!');
+                        }
+                    }
+                }
+            });
+            $('#TCouldImg').change(function (evt) {
+                if (evt.target.files && evt.target.files.length > 0) {
+                    for (var i = 0; i < evt.target.files.length; i++) {
+                        var file = evt.target.files[i];
+                        var name = file.name.toLowerCase();
+                        if (name.indexOf('.jpg') || name.indexOf('.png')) {
+                            //ResizeImage(file);
+                            LoadResizeImageData(file, function (filename, buffer) {
+                                AdminSettingGetFileAndTCloudToken(filename).execute(function (r) {
+                                    var token = r.Data.Token;
+                                    var url = r.Data.Url;
+                                    $.ajax({
+                                        url: url,
+                                        type: 'PUT',
+                                        data: buffer,
+                                        contentType: false,
+                                        processData: false,
+                                        beforeSend: function (xhr) {
+                                            xhr.setRequestHeader("Authorization", token);
+                                            $('#imgLoading').show();
+                                        },
+                                        success: function (result) {
+                                            var str = "\r\n";
+                                            str += "![](" + url + ")";
+                                            str += "\r\n";
+                                            blogEditor.content += str;
+                                        },
+                                        complete: function (jqXHR, textStatus) {
+                                            if (textStatus != 'success')
+                                                alert("Error:" + jqXHR.responseText);
+                                            $('#imgLoading').hide();
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                        else {
+                            alert(name + '无效，请选择jpg或png图片!');
+                        }
+                    }
+                }
+            });
+
+            $('#upfile').change(function (evt) {
+                if (evt.target.files && evt.target.files.length > 0) {
+                    for (var i = 0; i < evt.target.files.length; i++) {
+                        var file = evt.target.files[i];
+                        var filename = file.name;
+                        AdminSettingGetFileAndTCloudToken(filename).execute(function (r) {
+                            var token = r.Data.Token;
+                            var url = r.Data.Url;
+                            var reader = new FileReader();
+                            reader.onload = function (evt) {
+                                if (evt.target.readyState == FileReader.DONE) {
+                                    var buffer = reader.result;
+                                    $.ajax({
+                                        url: url,
+                                        type: 'PUT',
+                                        data: buffer,
+                                        contentType: false,
+                                        processData: false,
+                                        beforeSend: function (xhr) {
+                                            xhr.setRequestHeader("Authorization", token);
+                                            $('#imgLoading').show();
+                                        },
+                                        success: function (result) {
+                                            var str = $('#txtContent').val();
+                                            str += "[" + filename + "](" + encodeURI(url) + ")";
+                                            $('#txtContent').val(str);
+                                            $('#txtView').html(marked(str, { sanitize: true }));
+                                        },
+                                        complete: function (jqXHR, textStatus) {
+                                            if (textStatus != 'success')
+                                                alert("Error:" + jqXHR.responseText);
+                                            $('#imgLoading').hide();
+                                        }
+                                    });
+                                }
+                            };
+                            var blob = file.slice(0, file.size);
+                            reader.readAsArrayBuffer(blob);
+                        });
+                    }
                 }
             });
         }
