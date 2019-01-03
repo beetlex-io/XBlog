@@ -8,6 +8,14 @@
 
 [配置腾讯云存储](https://www.ikende.com/blog/95.html)
 
+## 1.0
+- 编辑blog增加本地图片上传，支持QQ截图，网页复制图片粘贴
+- 增加相册功能，支持相册图片域名设置方便CDN处理
+- 增加评论保存评论者昵称
+
+[XBlog1.0.zip](https://github.com/IKende/XBlog/blob/master/Publish/XBlog1.0.zip)
+
+
 ## 技术要点
 - 基于`dotnet core`平台，可以运行在windows和linux系统上
 - 完全基于[`BeetleX.FastHttpAp`](https://github.com/IKende/FastHttpApi)框架开发
